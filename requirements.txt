@@ -1,0 +1,4 @@
+playwright==1.42.0
+openai==1.14.1
+tenacity==8.2.3
+python-dotenv==1.0.1
