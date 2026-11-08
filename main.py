@@ -13,8 +13,8 @@ load_dotenv()
 
 gemini_key = os.getenv("GEMINI_API_KEY")
 pixabay_key = os.getenv("PIXABAY_API_KEY")
-gmail_user = os.getenv("GMAIL_USER")       # Aapka Gmail address (GitHub Secret se)
-gmail_password = os.getenv("GMAIL_APP_PASSWORD") # Gmail App Password
+gmail_user = os.getenv("GMAIL_USER")
+gmail_password = os.getenv("GMAIL_APP_PASSWORD")
 
 if not gemini_key:
     print("❌ Error: GEMINI_API_KEY environment variable not found!")
@@ -88,16 +88,17 @@ def run_pipeline():
 
         print("🚀 Requesting production payload from Gemini API...")
         
-        # Retry logic for Gemini API
+        # Robust Retry logic with increased timeout
         response = None
-        for attempt in range(3):
+        for attempt in range(4):
             try:
-                response = requests.post(url, json=payload, headers=headers, timeout=30)
+                response = requests.post(url, json=payload, headers=headers, timeout=60)
                 if response.status_code == 200:
                     break
+                print(f"⚠️ Attempt {attempt+1} status code: {response.status_code}. Retrying...")
             except Exception as e:
-                print(f"⚠️ Attempt {attempt+1} failed: {e}")
-                time.sleep(3)
+                print(f"⚠️ Attempt {attempt+1} connection error: {e}")
+                time.sleep(5)
 
         if not response or response.status_code != 200:
             err_text = response.text if response else "Connection timeout"
@@ -149,40 +150,9 @@ def run_pipeline():
                 
                 pixabay_url = f"https://pixabay.com/api/videos/?key={pixabay_key}&q={query}&video_type=film&per_page=3"
                 
-                # Retry for video download
                 v_downloaded = False
-                for attempt in range(2):
+                for attempt in range(3):
                     try:
-                        res = requests.get(pixabay_url, timeout=20)
+                        res = requests.get(pixabay_url, timeout=30)
                         if res.status_code == 200:
                             pix_data = res.json()
-                            hits = pix_data.get('hits', [])
-                            if hits:
-                                video_files = hits[0].get('videos', {})
-                                video_download_url = video_files.get('medium', {}).get('url') or video_files.get('small', {}).get('url')
-                                
-                                if video_download_url:
-                                    v_res = requests.get(video_download_url, timeout=30)
-                                    v_filename = os.path.join(videos_dir, f"scene_{scene_num}.mp4")
-                                    with open(v_filename, "wb") as vf:
-                                        vf.write(v_res.content)
-                                    print(f"✅ Saved video for Scene {scene_num}: {v_filename}")
-                                    v_downloaded = True
-                                    break
-                    except Exception as ex:
-                        print(f"⚠️ Video download attempt {attempt+1} failed: {ex}")
-                        time.sleep(2)
-                
-                if not v_downloaded:
-                    print(f"⚠️ Skipping video for Scene {scene_num} after retries.")
-
-        print(f"✅ Extreme Production Bundle successfully compiled in: {output_dir}")
-
-    except Exception as e:
-        error_msg = str(e)
-        print(f"❌ Critical Pipeline Error: {error_msg}")
-        send_gmail_alert(error_msg)
-        exit(1)
-
-if __name__ == "__main__":
-    run_pipeline()
