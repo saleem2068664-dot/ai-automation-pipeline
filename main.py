@@ -1,14 +1,13 @@
 import os
 import google.generativeai as genai
 
-# Configure Gemini API Key
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
-print("🚀 Requesting production payload using Gemini 1.5 Flash...")
+print("🚀 Requesting production payload using Gemini...")
 
-# Explicit model name set as requested
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
+# Standard model identifier for v1beta SDK
+model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 raw_json_str = None
 for attempt in range(4):
