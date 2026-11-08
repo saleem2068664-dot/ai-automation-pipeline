@@ -88,7 +88,6 @@ def run_pipeline():
 
         print("🚀 Requesting production payload from Gemini API...")
         
-        # Robust Retry logic with increased timeout
         response = None
         for attempt in range(4):
             try:
@@ -139,7 +138,7 @@ def run_pipeline():
             tts.save(audio_path)
             print(f"✅ Voiceover audio successfully saved: {audio_path}")
 
-        # 4. Fetch HD Stock Video Clips via Pixabay API with Retry
+        # 4. Fetch HD Stock Video Clips via Pixabay API
         scenes = production_data.get('scenes', [])
         if pixabay_key and scenes:
             print("🎬 Fetching HD stock video clips from Pixabay API...")
@@ -156,3 +155,33 @@ def run_pipeline():
                         res = requests.get(pixabay_url, timeout=30)
                         if res.status_code == 200:
                             pix_data = res.json()
+                            hits = pix_data.get('hits', [])
+                            if hits:
+                                video_files = hits[0].get('videos', {})
+                                video_download_url = video_files.get('medium', {}).get('url') or video_files.get('small', {}).get('url')
+                                
+                                if video_download_url:
+                                    v_res = requests.get(video_download_url, timeout=45)
+                                    v_filename = os.path.join(videos_dir, f"scene_{scene_num}.mp4")
+                                    with open(v_filename, "wb") as vf:
+                                        vf.write(v_res.content)
+                                    print(f"✅ Saved video for Scene {scene_num}: {v_filename}")
+                                    v_downloaded = True
+                                    break
+                    except Exception as ex:
+                        print(f"⚠️ Video download attempt {attempt+1} failed: {ex}")
+                        time.sleep(3)
+                
+                if not v_downloaded:
+                    print(f"⚠️ Skipping video for Scene {scene_num} after retries.")
+
+        print(f"✅ Extreme Production Bundle successfully compiled in: {output_dir}")
+
+    except Exception as e:
+        error_msg = str(e)
+        print(f"❌ Critical Pipeline Error: {error_msg}")
+        send_gmail_alert(error_msg)
+        exit(1)
+
+if __name__ == "__main__":
+    run_pipeline()
