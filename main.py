@@ -7,8 +7,10 @@ from gtts import gTTS
 
 load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
+gemini_key = os.getenv("GEMINI_API_KEY")
+pixabay_key = os.getenv("PIXABAY_API_KEY")
+
+if not gemini_key:
     print("❌ Error: GEMINI_API_KEY environment variable not found!")
     exit(1)
 
@@ -26,10 +28,10 @@ The JSON must follow this exact structure:
     {
       "scene_number": 1,
       "timestamp": "0:00-0:03",
+      "search_keyword": "single concise english keyword for video search (e.g. robot, futuristic, space)",
       "voiceover": "Line spoken",
       "visual_description": "Cinematic visual description",
-      "ai_video_prompt": "Ultra-detailed prompt featuring lighting, camera motion",
-      "audio_sfx_prompt": "Sound effect direction"
+      "ai_video_prompt": "Ultra-detailed prompt featuring lighting, camera motion"
     }
   ],
   "metadata": {
@@ -42,7 +44,7 @@ The JSON must follow this exact structure:
 
 user_topic_prompt = "Create an advanced, high-retention viral YouTube Short concept about 'Breakthrough AI Automation and Future Robotics'."
 
-url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
 
 payload = {
     "contents": [{"parts": [{"text": system_prompt + "\n\nTask: " + user_topic_prompt}]}],
@@ -68,7 +70,8 @@ if response.status_code == 200:
 
     today_stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     output_dir = os.path.join("production_output", today_stamp)
-    os.makedirs(output_dir, exist_ok=True)
+    videos_dir = os.path.join(output_dir, "scene_videos")
+    os.makedirs(videos_dir, exist_ok=True)
     
     # 1. Save JSON Blueprint
     json_path = os.path.join(output_dir, "production_blueprint.json")
@@ -91,6 +94,34 @@ if response.status_code == 200:
         audio_path = os.path.join(output_dir, "voiceover_audio.mp3")
         tts.save(audio_path)
         print(f"✅ Voiceover audio successfully saved: {audio_path}")
+
+    # 4. Fetch HD Stock Video Clips via Pixabay API
+    scenes = production_data.get('scenes', [])
+    if pixabay_key and scenes:
+        print("🎬 Fetching HD stock video clips from Pixabay API...")
+        for scene in scenes:
+            scene_num = scene.get('scene_number', 1)
+            query = scene.get('search_keyword', 'technology')
+            print(f"🔍 Searching video for Scene {scene_num} (Query: '{query}')...")
+            
+            pixabay_url = f"https://pixabay.com/api/videos/?key={pixabay_key}&q={query}&video_type=film&per_page=3"
+            res = requests.get(pixabay_url)
+            
+            if res.status_code == 200:
+                pix_data = res.json()
+                hits = pix_data.get('hits', [])
+                if hits:
+                    video_files = hits[0].get('videos', {})
+                    video_download_url = video_files.get('medium', {}).get('url') or video_files.get('small', {}).get('url')
+                    
+                    if video_download_url:
+                        v_res = requests.get(video_download_url)
+                        v_filename = os.path.join(videos_dir, f"scene_{scene_num}.mp4")
+                        with open(v_filename, "wb") as vf:
+                            vf.write(v_res.content)
+                        print(f"✅ Saved video for Scene {scene_num}: {v_filename}")
+                else:
+                    print(f"⚠️ No videos found for query '{query}'")
 
     print(f"✅ Extreme Production Bundle successfully compiled in: {output_dir}")
 else:
