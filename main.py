@@ -74,7 +74,7 @@ def run_pipeline():
 
         user_topic_prompt = "Create an advanced, high-retention viral YouTube Short concept about 'Breakthrough AI Automation and Future Robotics'."
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={gemini_key}"
 
         payload = {
             "contents": [{"parts": [{"text": system_prompt + "\n\nTask: " + user_topic_prompt}]}],
