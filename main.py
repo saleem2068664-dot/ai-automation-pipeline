@@ -11,7 +11,7 @@ raw_json_str = None
 for attempt in range(4):
     try:
         response = co.chat(
-            model="command-r-plus",
+            model="command-r-08-2024",
             messages=[
                 {
                     "role": "user",
