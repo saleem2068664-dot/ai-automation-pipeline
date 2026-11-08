@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 from dotenv import load_dotenv
 from gtts import gTTS
+from moviepy.editor import AudioFileClip, ColorClip
 
 load_dotenv()
 
@@ -83,16 +84,40 @@ if response.status_code == 200:
         f.write("## 🎙️ Voiceover Script\n")
         f.write(f"{production_data.get('voiceover_script', '')}\n\n")
 
-    # 3. Generate Text-to-Speech (TTS) Voiceover Audio (.mp3)
+    # 3. Generate Text-to-Speech Voiceover Audio (.mp3)
     voiceover_text = production_data.get('voiceover_script', '')
+    audio_path = None
     if voiceover_text:
         print("🔊 Generating voiceover audio file (.mp3)...")
         tts = gTTS(text=voiceover_text, lang='en', slow=False)
         audio_path = os.path.join(output_dir, "voiceover_audio.mp3")
         tts.save(audio_path)
-        print(f"✅ Voiceover audio successfully saved: {audio_path}")
+        print(f"✅ Voiceover audio saved: {audio_path}")
 
-    print(f"✅ Extreme Production Bundle with Audio generated in: {output_dir}")
+    # 4. Render Final HD Video Short (.mp4) using MoviePy
+    if audio_path and os.path.exists(audio_path):
+        print("🎬 Rendering final HD video short (.mp4)...")
+        try:
+            audio_clip = AudioFileClip(audio_path)
+            duration = audio_clip.duration
+            
+            # Create vertical 1080x1920 cinematic background canvas
+            video_clip = ColorClip(size=(1080, 1920), color=(15, 15, 22), duration=duration)
+            video_clip = video_clip.set_audio(audio_clip)
+            
+            final_video_path = os.path.join(output_dir, "final_short.mp4")
+            video_clip.write_videofile(
+                final_video_path, 
+                fps=24, 
+                codec="libx264", 
+                audio_codec="aac",
+                logger=None
+            )
+            print(f"✅ Final Video Short successfully rendered: {final_video_path}")
+        except Exception as e:
+            print(f"⚠️ Video rendering warning/error: {e}")
+
+    print(f"✅ Extreme Production Bundle fully compiled in: {output_dir}")
 else:
     print(f"❌ API Error Code: {response.status_code}")
     print(response.text)
