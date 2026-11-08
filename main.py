@@ -74,8 +74,8 @@ def run_pipeline():
 
         user_topic_prompt = "Create an advanced, high-retention viral YouTube Short concept about 'Breakthrough AI Automation and Future Robotics'."
 
-        # Updated to gemini-2.5-flash endpoint
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
+        # Standard gemini-1.5-flash endpoint
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={gemini_key}"
 
         payload = {
             "contents": [{"parts": [{"text": system_prompt + "\n\nTask: " + user_topic_prompt}]}],
@@ -95,7 +95,7 @@ def run_pipeline():
                 response = requests.post(url, json=payload, headers=headers, timeout=60)
                 if response.status_code == 200:
                     break
-                print(f"⚠️ Attempt {attempt+1} status code: {response.status_code}. Retrying...")
+                print(f"⚠️ Attempt {attempt+1} status code: {response.status_code}. Response: {response.text}")
             except Exception as e:
                 print(f"⚠️ Attempt {attempt+1} connection error: {e}")
                 time.sleep(5)
