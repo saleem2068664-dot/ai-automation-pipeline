@@ -1,31 +1,53 @@
 import os
 import cohere
+from gtts import gTTS
+from moviepy.editor import TextClip, ColorClip, CompositeVideoClip
 
-# Configure Cohere Client using GitHub Secret
+# 1. Generate Short Prompt using Cohere API
 api_key = os.environ.get("COHERE_API_KEY")
 co = cohere.ClientV2(api_key=api_key)
 
-print("🚀 Requesting production payload using Cohere API...")
+print("🚀 Requesting Short Concept from Cohere...")
 
-raw_json_str = None
-for attempt in range(4):
-    try:
-        response = co.chat(
-            model="command-r-08-2024",
-            messages=[
-                {
-                    "role": "user",
-                    "content": "Generate a viral YouTube Short concept about AI automation.",
-                }
-            ],
-        )
-        raw_json_str = response.message.content[0].text
-        break
-    except Exception as e:
-        print(f"Attempt {attempt+1} failed: {e}")
+response = co.chat(
+    model="command-r-08-2024",
+    messages=[
+        {
+            "role": "user",
+            "content": "Write a 1-sentence catchy hook about AI Automation (under 15 words).",
+        }
+    ],
+)
+text_content = response.message.content[0].text.strip()
+print(f"Generated Hook: {text_content}")
 
-if raw_json_str:
-    print("Successfully generated response!")
-    print(raw_json_str)
-else:
-    raise Exception("Critical Pipeline Error: Cohere API failed to generate response after retries.")
+# 2. Setup Production Directory
+os.makedirs("production_output", exist_ok=True)
+
+# 3. Create 10-Second Video Clip (1080x1920 Shorts Format)
+duration = 10
+bg_clip = ColorClip(size=(1080, 1920), color=(15, 23, 42), duration=duration)
+
+# Create Text Overlay
+txt_clip = TextClip(
+    text_content,
+    fontsize=50,
+    color='white',
+    font='Arial',
+    method='caption',
+    size=(900, None)
+).set_position('center').set_duration(duration)
+
+# Combine Background and Text
+final_video = CompositeVideoClip([bg_clip, txt_clip])
+
+# Export MP4 Video File
+output_video_path = "production_output/short_10sec_video.mp4"
+final_video.write_videofile(
+    output_video_path,
+    fps=24,
+    codec="libx264",
+    audio=False
+)
+
+print(f"✅ 10-second video rendered and saved to {output_video_path}")
