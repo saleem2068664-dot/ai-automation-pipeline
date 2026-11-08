@@ -3,6 +3,8 @@ name: AI Agent Runner
 on:
   push:
     branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * *'  # Yeh rozana rat ko 12 baje (UTC) run hoga
   workflow_dispatch:
 
 jobs:
@@ -27,4 +29,3 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
-        
