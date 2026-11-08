@@ -1,4 +1,1 @@
-google-generativeai
-gTTS
-requests
-python-dotenv
+google-genaigoogle-genai

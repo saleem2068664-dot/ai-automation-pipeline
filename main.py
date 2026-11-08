@@ -1,19 +1,18 @@
 import os
-import google.generativeai as genai
+from google import genai
 
-# Configure Gemini API Key
-api_key = os.environ.get("GEMINI_API_KEY")
-genai.configure(api_key=api_key)
+# Automatically picks up GEMINI_API_KEY from environment variables
+client = genai.Client()
 
-print("🚀 Requesting production payload using Gemini Pro...")
-
-# Using gemini-pro for universal compatibility
-model = genai.GenerativeModel("gemini-pro")
+print("🚀 Requesting production payload using Google GenAI SDK...")
 
 raw_json_str = None
 for attempt in range(4):
     try:
-        response = model.generate_content("Generate a viral YouTube Short concept about AI automation.")
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents="Generate a viral YouTube Short concept about AI automation.",
+        )
         raw_json_str = response.text
         break
     except Exception as e:
@@ -23,4 +22,4 @@ if raw_json_str:
     print("Successfully generated response!")
     print(raw_json_str)
 else:
-    raise Exception("Critical Pipeline Error: Gemini SDK failed to generate response after retries.")
+    raise Exception("Critical Pipeline Error: SDK failed to generate response after retries.")
