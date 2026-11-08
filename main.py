@@ -8,6 +8,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from gtts import gTTS
 import requests
+import google.generativeai as genai
 
 load_dotenv()
 
@@ -19,6 +20,9 @@ gmail_password = os.getenv("GMAIL_APP_PASSWORD")
 if not gemini_key:
     print("❌ Error: GEMINI_API_KEY environment variable not found!")
     exit(1)
+
+# Configure official Gemini SDK
+genai.configure(api_key=gemini_key)
 
 def send_gmail_alert(error_message):
     if not gmail_user or not gmail_password:
@@ -74,38 +78,28 @@ def run_pipeline():
 
         user_topic_prompt = "Create an advanced, high-retention viral YouTube Short concept about 'Breakthrough AI Automation and Future Robotics'."
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
-
-        payload = {
-            "contents": [{"parts": [{"text": system_prompt + "\n\nTask: " + user_topic_prompt}]}],
-            "generationConfig": {
-                "response_mime_type": "application/json",
-                "temperature": 0.7
-            }
-        }
-
-        headers = {'Content-Type': 'application/json'}
-
-        print("🚀 Requesting production payload from Gemini API...")
+        print("🚀 Requesting production payload using official Gemini SDK...")
         
-        response = None
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        
+        raw_json_str = None
         for attempt in range(4):
             try:
-                response = requests.post(url, json=payload, headers=headers, timeout=60)
-                if response.status_code == 200:
+                response = model.generate_content(
+                    system_prompt + "\n\nTask: " + user_topic_prompt,
+                    generation_config={"response_mime_type": "application/json", "temperature": 0.7}
+                )
+                if response and response.text:
+                    raw_json_str = response.text
                     break
-                print(f"⚠️ Attempt {attempt+1} status code: {response.status_code}. Response: {response.text}")
+                print(f"⚠️ SDK Attempt {attempt+1} empty response, retrying...")
             except Exception as e:
-                print(f"⚠️ Attempt {attempt+1} connection error: {e}")
+                print(f"⚠️ SDK Attempt {attempt+1} error: {e}")
                 time.sleep(5)
 
-        if not response or response.status_code != 200:
-            err_text = response.text if response else "Connection timeout"
-            raise Exception(f"Gemini API Failed with status code: {response.status_code if response else 'N/A'}\n{err_text}")
+        if not raw_json_str:
+            raise Exception("Gemini SDK failed to generate response after retries (Connection timeout).")
 
-        res_data = response.json()
-        raw_json_str = res_data['candidates'][0]['content']['parts'][0]['text']
-        
         try:
             production_data = json.loads(raw_json_str)
         except:
