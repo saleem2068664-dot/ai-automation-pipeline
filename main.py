@@ -91,7 +91,7 @@ def run_pipeline():
         response = None
         for attempt in range(4):
             try:
-                response = requests.post(url, json=payload, headers=headers, timeout=60)
+                response = requests.post(url, json=payload, headers=headers, timeout=180)
                 if response.status_code == 200:
                     break
                 print(f"⚠️ Attempt {attempt+1} status code: {response.status_code}. Response: {response.text}")
