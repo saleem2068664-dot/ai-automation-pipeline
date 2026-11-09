@@ -1,4 +1,4 @@
-Set-Content .github/workflows/agent.yml -Value @"
+Set-Content 
 name: AI Automation Pipeline
 
 on:
