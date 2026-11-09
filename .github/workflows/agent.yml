@@ -10,6 +10,7 @@ on:
 jobs:
   render-pipeline:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout Code
@@ -23,7 +24,6 @@ jobs:
       - name: Install Python Requirements
         run: |
           pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install cohere edge-tts opencv-python
 
       - name: Install Blender and Headless OpenGL Dependencies
@@ -43,11 +43,13 @@ jobs:
         env:
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PYTHONUNBUFFERED: "1"
         run: |
           mkdir -p output
-          python main.py
+          xvfb-run -a python main.py
 
       - name: Upload Rendered Video Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cartoon-render-video
