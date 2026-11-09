@@ -41,4 +41,3 @@ jobs:
           name: cartoon-render-video
           path: output/
           retention-days: 7
-"@
