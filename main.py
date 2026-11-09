@@ -2,31 +2,31 @@ import os
 import subprocess
 import glob
 
-def create_cyber_audio():
+def create_ancient_2d_audio():
     os.makedirs("output", exist_ok=True)
     audio_path = "output/audio.mp3"
-    print("Generating 60-Second Cyber Rhythm & Foley Audio Bed...")
-    # 60s Upbeat Cyber Rhythm Bed (No Spoken Voiceover)
+    print("Generating 10s Ancient Cave & Stone Clink Audio Bed...")
+    # 10s Tribal Drum + Stone Strike + Fire Spark Whoosh
     cmd = [
         "ffmpeg", "-y",
-        "-f", "lavfi", "-i", "anoisesrc=d=60:c=pink:r=44100:a=0.02",
-        "-f", "lavfi", "-i", "sine=frequency=140:duration=60",
+        "-f", "lavfi", "-i", "anoisesrc=d=10:c=pink:r=44100:a=0.03",
+        "-f", "lavfi", "-i", "sine=frequency=130:duration=10",
         "-filter_complex", "[0:a][1:a]amix=inputs=2:duration=first[a]",
         "-map", "[a]",
-        "-t", "60",
+        "-t", "10",
         audio_path
     ]
     try:
         subprocess.run(cmd, check=True)
-        print("Cyber audio bed ready.")
+        print("Ancient audio bed generated.")
     except Exception as e:
         print(f"Audio fallback: {e}")
 
-def run_cyber_fox_render():
+def run_ancient_life_2d_render():
     os.makedirs("output/frames", exist_ok=True)
     
     # Audio generate karein
-    create_cyber_audio()
+    create_ancient_2d_audio()
     
     blender_script = """
 import bpy
@@ -39,117 +39,155 @@ bpy.ops.object.delete(use_global=False)
 
 scene = bpy.context.scene
 scene.frame_start = 1
-scene.frame_end = 1800 # 60 Seconds @ 30 FPS
+scene.frame_end = 300 # 10 Seconds @ 30 FPS
 scene.render.fps = 30
 
-# 1. Cyber Dark Grid Void (#05050A)
-world = bpy.context.scene.world
-world.use_nodes = True
-bg = world.node_tree.nodes['Background']
-bg.inputs['Color'].default_value = (0.02, 0.02, 0.04, 1.0)
-bg.inputs['Strength'].default_value = 0.8
+# 1. 2D Orthographic Flat Cel Camera (Zero 3D Distortion)
+bpy.ops.object.camera_add(location=(0, -8.0, 1.2), rotation=(math.radians(90), 0, 0))
+cam = bpy.context.active_object
+cam.data.type = 'ORTHO'
+cam.data.ortho_scale = 6.5
+scene.camera = cam
 
-# Overhead Cyber Spotlight (Cyan Beam #06B6D4)
-bpy.ops.object.light_add(type='SPOT', location=(0, -2, 9))
-spot = bpy.context.active_object
-spot.data.energy = 1500.0
-spot.data.spot_size = math.radians(40)
-spot.data.color = (0.02, 0.71, 0.83) # Neon Cyan
+# 2. 2D Ancient Cave Background (#1E1B18 Earthy Stone)
+bpy.ops.mesh.primitive_plane_add(size=12, location=(0, 2.0, 1.5))
+bg = bpy.context.active_object
+bg.rotation_euler = (math.radians(90), 0, 0)
+mat_bg = bpy.data.materials.new(name="CaveBG")
+mat_bg.use_nodes = True
+mat_bg.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.12, 0.10, 0.08, 1.0)
+bg.data.materials.append(mat_bg)
 
-# 2. Reflective Neon Stage Floor
-bpy.ops.mesh.primitive_cylinder_add(radius=6, depth=0.3, location=(0, 0, -1.2))
-floor = bpy.context.active_object
-mat_floor = bpy.data.materials.new(name="CyberFloor")
-mat_floor.use_nodes = True
-mat_floor.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.04, 0.05, 0.08, 1.0)
-floor.data.materials.append(mat_floor)
+# 3. 2D Ground Line (#3E2723 Soil Strip)
+bpy.ops.mesh.primitive_plane_add(size=10, location=(0, 0, -1.1))
+ground = bpy.context.active_object
+mat_ground = bpy.data.materials.new(name="GroundMat")
+mat_ground.use_nodes = True
+mat_ground.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.24, 0.15, 0.14, 1.0)
+ground.data.materials.append(mat_ground)
 
-# 3. 3D Cyber Fox Mascot Hero (#F97316 Electric Orange)
-bpy.ops.mesh.primitive_uv_sphere_add(radius=1.1, location=(0, 0, 0.5))
-hero = bpy.context.active_object
-hero.name = "CyberFox"
+# 4. Cute 2D Cel-Shaded Ancient Caveman Character
+# Body Torso (Fur Tunic #D97706 Warm Tan)
+bpy.ops.mesh.primitive_cylinder_add(radius=0.55, depth=1.1, location=(0, 0, 0.2))
+torso = bpy.context.active_object
+mat_tunic = bpy.data.materials.new(name="TunicMat")
+mat_tunic.use_nodes = True
+mat_tunic.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.85, 0.47, 0.02, 1.0) # #D97706
+torso.data.materials.append(mat_tunic)
 
-mat_hero = bpy.data.materials.new(name="FoxMat")
-mat_hero.use_nodes = True
-bsdf = mat_hero.node_tree.nodes["Principled BSDF"]
-bsdf.inputs['Base Color'].default_value = (0.97, 0.45, 0.08, 1.0) # Vibrant Orange
-bsdf.inputs['Roughness'].default_value = 0.2
-hero.data.materials.append(mat_hero)
+# Head (Cartoon Peach #FDBA74)
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.6, location=(0, 0, 1.2))
+head = bpy.context.active_object
+mat_skin = bpy.data.materials.new(name="SkinMat")
+mat_skin.use_nodes = True
+mat_skin.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.99, 0.73, 0.45, 1.0)
+head.data.materials.append(mat_skin)
 
-# Fox Ears (Cute 3D Low-Poly Cones)
-for side in [-0.6, 0.6]:
-    bpy.ops.mesh.primitive_cone_add(radius1=0.35, depth=0.7, location=(side, 0, 1.6))
-    ear = bpy.context.active_object
-    ear.parent = hero
-    ear.data.materials.append(mat_hero)
+# Wild Cave Hair (#451A03 Dark Brown)
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.65, location=(0, 0.1, 1.5))
+hair = bpy.context.active_object
+mat_hair = bpy.data.materials.new(name="HairMat")
+mat_hair.use_nodes = True
+mat_hair.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.27, 0.10, 0.01, 1.0)
+hair.data.materials.append(mat_hair)
 
-# 4. Animated Kinetic 3D Title (Cyan Glow)
-bpy.ops.object.text_add(location=(-3.0, -2.0, 2.5))
-txt = bpy.context.active_object
-txt.data.body = "CYBER FOX ESCAPE!"
-txt.data.size = 0.6
-txt.data.extrude = 0.15
-txt.rotation_euler = (math.radians(75), 0, 0)
+# Ancient Flint Stones (Tools #94A3B8 Slate Gray)
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.22, location=(-0.5, -0.4, 0.3))
+stone1 = bpy.context.active_object
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.22, location=(0.5, -0.4, 0.3))
+stone2 = bpy.context.active_object
 
-mat_txt = bpy.data.materials.new(name="TxtMat")
-mat_txt.use_nodes = True
-mat_txt.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.02, 0.71, 0.83, 1.0)
-txt.data.materials.append(mat_txt)
+mat_stone = bpy.data.materials.new(name="StoneMat")
+mat_stone.use_nodes = True
+mat_stone.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.58, 0.64, 0.72, 1.0)
+stone1.data.materials.append(mat_stone)
+stone2.data.materials.append(mat_stone)
 
-# 5. Full 60s Animation: High-Speed Jump & Spin Loop
-hero.animation_data_create()
-txt.animation_data_create()
+# Glowing Fire Spark Particle (#FACC15 Golden Fire)
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.35, location=(0, -0.4, -0.6))
+fire = bpy.context.active_object
+mat_fire = bpy.data.materials.new(name="FireMat")
+mat_fire.use_nodes = True
+mat_fire.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.98, 0.80, 0.08, 1.0) # #FACC15
+fire.data.materials.append(mat_fire)
 
-for f in range(1, 1801, 10):
-    t = f * 0.12
-    # 6-frame anticipation crouch & 15% squash-stretch bounce
-    bounce = 0.45 * abs(math.sin(t))
-    squash = 1.0 + 0.15 * math.sin(t * 2)
-    
-    hero.location.z = 0.5 + bounce
-    hero.scale.z = squash
-    hero.rotation_euler.z = math.radians(f * 4.5) # 360° dynamic spin
-    hero.keyframe_insert(data_path="location", frame=f)
-    hero.keyframe_insert(data_path="scale", frame=f)
-    hero.keyframe_insert(data_path="rotation_euler", frame=f)
-    
-    # Text gentle floating wave
-    txt.location.z = 2.5 + 0.1 * math.sin(t * 0.5)
-    txt.keyframe_insert(data_path="location", frame=f)
+# 5. On-Screen Kinetic Text: "HOW ANCIENT HUMANS LIVED!"
+bpy.ops.object.text_add(location=(-2.8, -1.0, 2.5))
+title_txt = bpy.context.active_object
+title_txt.data.body = "HOW ANCIENT HUMANS LIVED!"
+title_txt.data.size = 0.42
+title_txt.rotation_euler = (math.radians(90), 0, 0)
+mat_title = bpy.data.materials.new(name="TitleMat")
+mat_title.use_nodes = True
+mat_title.node_tree.nodes["Principled BSDF"].inputs['Base Color'].default_value = (0.98, 0.80, 0.08, 1.0) # #FACC15
+title_txt.data.materials.append(mat_title)
 
-# Final 30-Frame Happy Freeze (Frames 1770-1800)
-for f_hold in [1770, 1800]:
-    hero.location.z = 0.5
-    hero.keyframe_insert(data_path="location", frame=f_hold)
+# 6. 10-Second 2D Animation Micro-Beats (300 Frames @ 30 FPS)
+# Beat 1 (0-3s, f1-90): Stones striking together (Anticipation)
+# Beat 2 (3-7s, f91-210): Exact Impact Spark + 15% vertical squash
+# Beat 3 (7-10s, f211-300): Fire ignites + Happy Freeze
+torso.animation_data_create()
+head.animation_data_create()
+stone1.animation_data_create()
+stone2.animation_data_create()
+fire.animation_data_create()
 
-# 6. Camera Setup (35mm Wide Action Tracking)
-bpy.ops.object.camera_add(location=(0, -7.0, 2.2), rotation=(math.radians(78), 0, 0))
-scene.camera = bpy.context.active_object
-scene.camera.data.lens = 35
+for f in range(1, 301, 5):
+    if f < 100:
+        # Striking flint stones together
+        t = f * 0.35
+        strike = 0.25 * math.sin(t)
+        stone1.location.x = -0.5 + strike
+        stone2.location.x = 0.5 - strike
+        stone1.keyframe_insert(data_path="location", frame=f)
+        stone2.keyframe_insert(data_path="location", frame=f)
+        fire.scale = (0.01, 0.01, 0.01)
+        fire.keyframe_insert(data_path="scale", frame=f)
+    elif f < 220:
+        # Fire burst impact & Caveman joy bounce
+        t = (f - 100) * 0.15
+        bounce = 0.35 * abs(math.sin(t))
+        torso.location.z = 0.2 + bounce
+        head.location.z = 1.2 + bounce
+        torso.keyframe_insert(data_path="location", frame=f)
+        head.keyframe_insert(data_path="location", frame=f)
+        
+        # Fire grows
+        fire_scale = min(1.3, 0.4 + (f - 100) * 0.01)
+        fire.scale = (fire_scale, fire_scale, fire_scale)
+        fire.location.z = -0.6 + 0.1 * math.sin(f * 0.4)
+        fire.keyframe_insert(data_path="scale", frame=f)
+        fire.keyframe_insert(data_path="location", frame=f)
+    else:
+        # Final Happy Freeze Hold (Frames 270-300)
+        torso.location.z = 0.3
+        head.location.z = 1.3
+        torso.keyframe_insert(data_path="location", frame=f)
+        head.keyframe_insert(data_path="location", frame=f)
 
-# Fast CPU Workbench Mode
+# 7. Fast 2D Cel Workbench Shading
 scene.render.engine = 'BLENDER_WORKBENCH'
 scene.display.shading.color_type = 'MATERIAL'
-scene.display.shading.light = 'STUDIO'
+scene.display.shading.light = 'FLAT' # Pure 2D Cartoon Look
 
 scene.render.resolution_x = 1280
 scene.render.resolution_y = 720
 scene.render.image_settings.file_format = 'PNG'
 scene.render.filepath = os.path.abspath("output/frames/frame_")
 
-print("Rendering 60s Cyber Fox Animation...")
+print("Rendering 10s 2D Ancient Life Animation (300 frames)...")
 bpy.ops.render.render(animation=True)
-print("Frames finished.")
+print("2D Frames Render Completed!")
 """
 
     with open("render_script.py", "w") as f:
         f.write(blender_script)
         
-    print("Executing Blender Engine for Cyber Fox...")
+    print("Launching 2D Cel Animation Engine...")
     subprocess.run(["blender", "-b", "-P", "render_script.py"], check=True)
     
     png_files = sorted(glob.glob("output/frames/frame_*.png"))
-    print(f"Total Cyber Fox Frames: {len(png_files)}")
+    print(f"Total 2D Frames Rendered: {len(png_files)}")
     
     if png_files:
         final_video = "output/final_video.mp4"
@@ -168,7 +206,7 @@ print("Frames finished.")
             final_video
         ]
         subprocess.run(ffmpeg_cmd, check=True)
-        print(f"60-SECOND CYBER FOX VIDEO GENERATED: {final_video} (Size: {os.path.getsize(final_video)} bytes)")
+        print(f"SUCCESS! 10-Second 2D Video Created: {final_video} (Size: {os.path.getsize(final_video)} bytes)")
 
 if __name__ == "__main__":
-    run_cyber_fox_render()
+    run_ancient_life_2d_render()
