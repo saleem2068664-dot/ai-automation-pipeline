@@ -9,7 +9,7 @@ api_key = os.environ.get("COHERE_API_KEY")
 co = cohere.ClientV2(api_key=api_key)
 
 print("🚀 Requesting script from Cohere...")
-script_text = "AI Automation 3D"
+script_text = "Intelligent Revolution"
 try:
     response = co.chat(
         model="command-r-08-2024",
@@ -36,7 +36,7 @@ async def generate_tts(text, output_file):
 print("🎙️ Generating Microsoft TTS Voiceover...")
 asyncio.run(generate_tts(script_text, voiceover_path))
 
-# 3. Create Blender Python automation script
+# 3. Create Blender Python automation script file directly
 blender_code = f"""
 import bpy
 import math
@@ -70,7 +70,7 @@ text_obj.keyframe_insert(data_path="rotation_euler", frame=1)
 text_obj.rotation_euler[2] = math.radians(360)
 text_obj.keyframe_insert(data_path="rotation_euler", frame=300)
 
-# Render Settings
+# Render Settings for 10-Second Video (Shorts 1080x1920 at 30fps)
 scene = bpy.context.scene
 scene.render.engine = 'CYCLES'
 scene.render.resolution_x = 1080
@@ -78,26 +78,24 @@ scene.render.resolution_y = 1920
 scene.render.resolution_percentage = 100
 scene.frame_start = 1
 scene.frame_end = 300
-
-bpy.ops.wm.save_as_mainfile(filepath="scene.blend")
-print(".blend project file generated successfully!")
 """
 
-with open("generate_scene.py", "w", encoding="utf-8") as f:
+with open("render_script.py", "w", encoding="utf-8") as f:
     f.write(blender_code)
 
-print("🎬 Generating Blender .blend file...")
-subprocess.run(["blender", "-b", "-P", "generate_scene.py"], check=True)
-
-# 4. Merge Voiceover with Video via FFmpeg
+# 4. Execute Blender Headless Rendering directly using the Python script
 os.makedirs("production_output", exist_ok=True)
 raw_video_path = "temp_video.mp4"
 final_video_path = "production_output/short_10sec_video.mp4"
 
-# Render raw video from Blender
-subprocess.run(["blender", "-b", "scene.blend", "-o", os.path.abspath(raw_video_path), "-F", "MPEG4", "-x", "1", "-a"], check=True)
+print("🎬 Running Blender Headless 3D Render...")
+subprocess.run([
+    "blender", "-b", "-P", "render_script.py",
+    "-o", os.path.abspath(raw_video_path),
+    "-F", "MPEG4", "-x", "1", "-a"
+], check=True)
 
-# Combine TTS Voiceover Audio with Rendered Video using FFmpeg
+# 5. Combine TTS Voiceover Audio with Rendered Video using FFmpeg
 if os.path.exists(voiceover_path) and os.path.exists(raw_video_path):
     print("🔊 Merging Microsoft TTS Audio with 3D Video...")
     ffmpeg_cmd = [
@@ -110,4 +108,6 @@ if os.path.exists(voiceover_path) and os.path.exists(raw_video_path):
         final_video_path
     ]
     subprocess.run(ffmpeg_cmd, check=True)
-    print("✅ Final 3D Video with Audio output generated!")
+    print("✅ Final 3D Video with Audio output generated successfully!")
+else:
+    print("⚠️ Audio or video file missing for merge.")
