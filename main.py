@@ -142,6 +142,7 @@ def render_firefly_animation():
     print(f"SUCCESS! Baby Firefly Urdu Video Ready: {final_video} (Size: {size_mb:.2f} MB)")
 
 if __name__ == "__main__":
-    render_firefly_animation()git add main.py
+    render_firefly_animation()if __name__ == "__main__":
+    render_firefly_animation()
 git commit -m "Generate 10s Baby Firefly cartoon with Urdu voiceover and magic glow"
 git push origin main --force
