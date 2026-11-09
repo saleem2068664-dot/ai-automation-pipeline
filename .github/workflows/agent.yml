@@ -1,38 +1,4 @@
-name: Run Blender 3D Animation Pipeline
-
-on:
-  push:
-  workflow_dispatch:
-
-jobs:
-  run-agent:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python Environment
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install Python Dependencies
-        run: pip install cohere edge-tts
-
-      - name: Install Blender and System Dependencies
+- name: Install Blender and System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender ffmpeg
-
-      - name: Execute Blender 3D Video Generation Script
-        run: python main.py
-        env:
-          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-          SHEEPIT_USER: ${{ secrets.SHEEPIT_USER }}
-          SHEEPIT_PUBLIC_KEY: ${{ secrets.SHEEPIT_PUBLIC_KEY }}
-
-      - name: Upload Production Output Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ai-video-production-bundle
-          path: production_output/
+          sudo apt-get install -y blender ffmpeg libgl1-mesa-dri libgl1-mesa-glx libegl1 libxi6 libxxf86vm1 libxfixes3 libxrender1
