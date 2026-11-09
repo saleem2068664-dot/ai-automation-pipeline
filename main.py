@@ -140,9 +140,5 @@ def render_firefly_animation():
     subprocess.run(cmd, check=True)
     size_mb = os.path.getsize(final_video) / (1024 * 1024)
     print(f"SUCCESS! Baby Firefly Urdu Video Ready: {final_video} (Size: {size_mb:.2f} MB)")
-
 if __name__ == "__main__":
-    render_firefly_animation()if __name__ == "__main__":
     render_firefly_animation()
-git commit -m "Generate 10s Baby Firefly cartoon with Urdu voiceover and magic glow"
-git push origin main --force
