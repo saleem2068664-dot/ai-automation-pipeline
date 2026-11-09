@@ -1,4 +1,21 @@
-- name: Install Blender and System Dependencies
+name: AI Automation Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Blender and System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y blender ffmpeg libgl1 libegl1 libxi6 libxxf86vm1 libxfixes3 libxrender1
