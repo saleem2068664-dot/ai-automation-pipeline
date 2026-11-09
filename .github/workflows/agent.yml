@@ -20,6 +20,12 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install Python Requirements
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install cohere edge-tts opencv-python
+
       - name: Install Blender and Headless OpenGL Dependencies
         run: |
           sudo apt-get update
@@ -34,6 +40,9 @@ jobs:
           python generate_audio.py
 
       - name: Render Blender Video
+        env:
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           mkdir -p output
           python main.py
