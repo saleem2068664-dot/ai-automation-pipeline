@@ -29,7 +29,18 @@ jobs:
         run: |
           blender --version
 
-      - name: Run Blender Headless Render Test
+      - name: Generate Synchronized Audio & SFX Bed
+        run: |
+          python generate_audio.py
+
+      - name: Render Blender Video
         run: |
           mkdir -p output
-          xvfb-run blender -b -P render_script.py -- python-expr "print('Blender Headless Engine Verified!')"
+          python main.py
+
+      - name: Upload Rendered Video Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cartoon-render-video
+          path: output/
+          retention-days: 7
