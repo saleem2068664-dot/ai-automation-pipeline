@@ -2,7 +2,6 @@ name: Run Blender 3D Animation Pipeline
 
 on:
   push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -17,25 +16,20 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install Python Dependencies
+        run: pip install cohere edge-tts
+
       - name: Install Blender and System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y blender ffmpeg
 
-      - name: Install Python Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
       - name: Execute Blender 3D Video Generation Script
+        run: python main.py
         env:
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-        run: |
-          python main.py
-
-      - name: Create Production Output Directory
-        run: |
-          mkdir -p production_output
+          SHEEPIT_USER: ${{ secrets.SHEEPIT_USER }}
+          SHEEPIT_PUBLIC_KEY: ${{ secrets.SHEEPIT_PUBLIC_KEY }}
 
       - name: Upload Production Output Artifacts
         uses: actions/upload-artifact@v4
