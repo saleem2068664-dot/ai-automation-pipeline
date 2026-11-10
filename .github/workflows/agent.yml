@@ -1,16 +1,13 @@
-name: AI Automation Pipeline
+name: AI Video Automation Pipeline
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   render-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
       - name: Checkout Code
@@ -21,27 +18,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Python Dependencies
+      - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install opencv-python numpy edge-tts
+          pip install opencv-python numpy edge-tts requests replicate
 
       - name: Install System FFmpeg
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Render Ancient Animation Video
+      - name: Render AI Video
         env:
-          PYTHONUNBUFFERED: "1"
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
         run: |
-          mkdir -p output/frames
+          mkdir -p output
           python main.py
 
-      - name: Upload Rendered Video
-        if: always()
+      - name: Upload Rendered Video Artifact
         uses: actions/upload-artifact@v4
         with:
           name: cartoon-render-video
-          path: output/
+          path: output/final_video.mp4
           retention-days: 7

@@ -5,84 +5,89 @@ import subprocess
 import asyncio
 import urllib.request
 import edge_tts
+import replicate
 
 # -------------------------------------------------------------
-# 1. 100% SCRIPT-ACCURATE SPACE & BLACK HOLE DOCUMENTARY
+# 1. THE ICE AGE SURVIVAL SCRIPT & FLUX AI PROMPTS
 # -------------------------------------------------------------
 DOC_SCRIPT = (
-    "ہماری خوبصورت نیلی زمین اس لامحدود کائنات میں محض ایک چھوٹا سا ذرہ ہے۔ "
-    "ہمارا سورج اربوں سالوں سے روشنی اور زندگی بانٹ رہا ہے، "
-    "لیکن جب کوئی دیوہیکل ستارہ مرتا ہے، تو خلا میں ایک زبردست دھماکہ ہوتا ہے! "
-    "اور اس کے مرکز میں ایک تاریک بلیک ہول جنم لیتا ہے! "
-    "بلیک ہول کی کشش ثقل اتنی بے پناہ ہوتی ہے کہ روشنی بھی اس کے چنگل سے فرار نہیں ہو سکتی۔ "
-    "یہ انسان کی تاریخ میں کھینچی گئی بلیک ہول کی پہلی حقیقی تصویر ہے! "
-    "سائنسدان جدید ترین خلائی دوربینوں سے دور دراز نیبولا اور کہکشاؤں کو کھوج رہے ہیں، "
-    "جہاں اربوں نئے ستارے ہر لمحہ جنم لے رہے ہیں۔ "
-    "کائنات کا یہ لامتناہی سمندر ہمیں یاد دلاتا ہے کہ ہمارے راز ابھی شروع ہوئے ہیں۔ "
-    "شاید انسان کی اصل منزل ستاروں کے اسی سفر میں چھپی ہے!"
+    "تصور کریں، اگر آپ اچانک بیس ہزار سال پیچھے برفانی دور میں آنکھ کھولیں! "
+    "سب سے پہلی چیز جو آپ کو محسوس ہوگی وہ شدید ٹھنڈ نہیں... بلکہ ایک پراسرار خاموشی ہوگی۔ "
+    "یہاں درجہ حرارت منفی تیس ڈگری ہے، اور زمین پر میلوں دور تک صرف برف کی چادر پھیلی ہے۔ "
+    "دور افق پر آپ کو دیوہیکل میمتھ اور خونخوار شکاری جانوروں کے سائے نظر آتے ہیں۔ "
+    "نہ کوئی موبائل، نہ ہسپتال، نہ ماڈرن کپڑے۔ آپ کی واحد امید دور کسی غار میں جلتی ہوئی وہ آگ ہے! "
+    "جہاں قدیم قبائلی انسان پتھر کے ہتھیار لیے جمع ہیں۔ "
+    "اگر آپ نے ان سے دوستی کر لی تو بچ جائیں گے، ورنہ یہ وحشی رات آپ کو ہمیشہ کے لیے جما دے گی۔ "
+    "ہمارے آباؤ اجداد اس کٹھن دور میں زندہ رہے، اسی لیے آج ہم اور آپ یہاں موجود ہیں!"
 )
 
-# 10 VERIFIED, 100% WORKING REAL NASA & HUBBLE PHOTOGRAPHS
-SPACE_SCENES = [
+# Har scene ke liye FLUX AI 4K Photorealistic Prompts (100% Script Matched)
+AI_SCENES = [
     {
-        "title": "THE PALE BLUE DOT",
-        "sub": "HAMARI ZAMEEN: KAINAT KA CHOTA SA ZARRA",
+        "title": "THE FROZEN AWAKENING",
+        "sub": "20,000 SAAL PEHLE KI BARFANI DUNIYA",
         "mode": "zoom_in",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1280px-The_Earth_seen_from_Apollo_17.jpg"
+        "prompt": "hyper-realistic 8k cinematic concept art, lone person waking up in a massive arctic snow blizzard, frozen eyelashes, dramatic lighting, national geographic 4k"
     },
     {
-        "title": "THE BLAZING SUN",
-        "sub": "SURAAJ: ZINDAGI AUR TAWANAI KA SARCHASHMA",
+        "title": "DEADLY SILENCE",
+        "sub": "KHOFNAK KHAMOSHI AUR SHADEED THAND",
         "mode": "zoom_out",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg/1280px-The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg"
+        "prompt": "extreme wide shot of colossal frozen glaciers and ice mountains 20000 bc ice age, eerie atmospheric fog, volumetric winter sunlight, highly detailed 8k"
     },
     {
-        "title": "SUPERNOVA EXPLOSION",
-        "sub": "JAB SITARA KHOLTI HUI MAUT MARTA HAI",
+        "title": "SUB-ZERO REALITY",
+        "sub": "DARJA-E-HARARAT MANFI 30 DEGREES",
         "mode": "zoom_in",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Crab_Nebula.jpg/1280px-Crab_Nebula.jpg"
+        "prompt": "close up of frozen frost crystals forming on ancient rocks in blizzard, sub-zero harsh winter wasteland, cinematic photography 8k"
     },
     {
-        "title": "THE MONSTER IN THE DARK",
-        "sub": "BLACK HOLE: ROSHNI BHI QAYD HO JATI HAI",
+        "title": "THE WOOLLY MAMMOTH",
+        "sub": "DIWA-HAIKAL MAMMOTH AUR SHIKARI",
         "mode": "zoom_out",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Black_hole%27s_accretion_disk_blank.jpg/1280px-Black_hole%27s_accretion_disk_blank.jpg"
+        "prompt": "giant woolly mammoth with massive curved tusks walking through deep snow storm, hyper-realistic fur textures, epic cinematic composition 8k"
     },
     {
-        "title": "FIRST DIRECT PHOTOGRAPH",
-        "sub": "TAREEKH MAIN PEHLI BAAR: M87 BLACK HOLE",
+        "title": "TRACKS IN THE SNOW",
+        "sub": "BARF MAIN GEHRE KHOJ",
         "mode": "zoom_in",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Black_hole_-_Messier_87_crop_max_res.jpg/1280px-Black_hole_-_Messier_87_crop_max_res.jpg"
+        "prompt": "deep animal and human footprints in fresh pristine white snow leading towards a dark cliff, atmospheric cold mist 8k"
     },
     {
-        "title": "LOOKING INTO DEEP TIME",
-        "sub": "SPACE TELESCOPE: KAINAT KE KONE",
+        "title": "LOST IN PREHISTORY",
+        "sub": "NA KOI MOBILE, NA KAPRE, NA MADAD",
         "mode": "zoom_out",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/HST-SM4.jpeg/1280px-HST-SM4.jpeg"
+        "prompt": "a primitive survivalist shivering in heavy raw animal hides looking across a vast prehistoric mountain valley, hyper-realistic, dramatic moody lighting"
     },
     {
-        "title": "COSMIC NURSERIES",
-        "sub": "ORION NEBULA: NAYE SITARON KA JANAM",
+        "title": "THE CAVE ENTRANCE",
+        "sub": "DOOR PAHAD KI GEHRI GHAAR",
         "mode": "zoom_in",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg/1280px-Orion_Nebula_-_Hubble_2006_mosaic_18000.jpg"
+        "prompt": "exterior shot of an ancient stone cave entrance carved into high mountain cliff with faint warm orange glow inside, dark winter twilight 8k"
     },
     {
-        "title": "ANDROMEDA GALAXY",
-        "sub": "HAMARI PAROSI SHANDAAR KAHKASHAN",
+        "title": "THE PRIMAL FIRE",
+        "sub": "ZINDAGI AUR MAUT KA FAISLA: AAG!",
         "mode": "zoom_out",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/M31_09-01-2011_%28cropped%29.jpg/1280px-M31_09-01-2011_%28cropped%29.jpg"
+        "prompt": "close up of a roaring warm prehistoric campfire inside a dark cave, crackling amber sparks and glowing embers, hyper-realistic national geographic style 8k"
     },
     {
-        "title": "THE SEA OF STARS",
-        "sub": "ARBON SITARON KA LAMAHDOOD SAMANDAR",
+        "title": "ICE AGE CLAN",
+        "sub": "PATTHAR KE HATHIYAR LIYE QADEEM INSAAN",
         "mode": "zoom_in",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Starsinthesky.jpg/1280px-Starsinthesky.jpg"
+        "prompt": "stone age paleolithic hunter gatherers holding stone spears gathered around cave fire, rugged intense faces, painted cave walls, photorealistic 8k"
     },
     {
-        "title": "DESTINY OF HUMANITY",
-        "sub": "INSAAN KA ASAL SAFAR SITARON KA HAI",
+        "title": "THE SURVIVAL NIGHT",
+        "sub": "AGAR DOSTI HUI TO BACHENGE",
         "mode": "zoom_out",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Bruce_McCandless_II_during_EVA_in_1984.jpg/1280px-Bruce_McCandless_II_during_EVA_in_1984.jpg"
+        "prompt": "dramatic silhouettes of ancient hunters standing on a snowy mountain ridge under a fierce howling blizzard storm, cinematic depth of field 8k"
+    },
+    {
+        "title": "DAWN OF HUMANITY",
+        "sub": "HUMARE ABA-O-AJDAD NE YEH JANG JEETI",
+        "mode": "zoom_in",
+        "prompt": "majestic ancient starry cosmos and milky way sky shining bright over snow-capped mountains, dawn sun rising on the horizon, breathtaking cinematic 8k"
     }
 ]
 
@@ -92,7 +97,7 @@ VOICE_NAME = "ur-PK-AsadNeural"
 # 2. AUDIO & AUTO-WHOOSH SFX GENERATOR
 # -------------------------------------------------------------
 async def record_full_voice(text: str, out_path: str):
-    print("🎙️ Recording Majestic Space Documentary Narration...")
+    print("🎙️ Recording Fast-Paced Suspenseful Urdu Narration...")
     comm = edge_tts.Communicate(text, VOICE_NAME, rate="-2%", pitch="-2Hz")
     await comm.save(out_path)
 
@@ -104,30 +109,28 @@ def get_audio_duration(file_path: str) -> float:
     try:
         return float(subprocess.check_output(cmd).strip())
     except Exception:
-        return 42.0
+        return 45.0
 
-def build_interstellar_soundtrack(duration_sec: float, cut_timestamps: list, dest_path: str):
-    """Deep space analog synth drone + transition WHOOSH effects"""
+def build_pro_soundtrack(duration_sec: float, cut_timestamps: list, dest_path: str):
     sample_rate = 44100
     t = np.linspace(0, duration_sec, int(sample_rate * duration_sec), endpoint=False)
     
-    # Deep interstellar harmonic pad (D minor / A sub-drone)
     drone = (
-        0.28 * np.sin(2 * np.pi * 55.00 * t) +
-        0.20 * np.sin(2 * np.pi * 73.42 * t) +
-        0.14 * np.sin(2 * np.pi * 110.00 * t) +
-        0.08 * np.sin(2 * np.pi * 220.00 * t)
+        0.28 * np.sin(2 * np.pi * 50.0 * t) +
+        0.20 * np.sin(2 * np.pi * 75.0 * t) +
+        0.14 * np.sin(2 * np.pi * 100.0 * t)
     )
-    drone *= (0.7 + 0.3 * np.sin(2 * np.pi * 0.06 * t))
-    total_audio = drone
+    drone *= (0.7 + 0.3 * np.sin(2 * np.pi * 0.08 * t))
+    np.random.seed(42)
+    ambient_wind = np.random.uniform(-0.03, 0.03, size=len(t))
+    total_audio = drone + ambient_wind
 
-    # Add dynamic Whoosh sound effect on every scene cut
     whoosh_dur = 0.40
     w_len = int(sample_rate * whoosh_dur)
     w_t = np.linspace(0, whoosh_dur, w_len, endpoint=False)
     bell = (np.sin(np.pi * (w_t / whoosh_dur))) ** 2
-    noise = np.random.uniform(-0.3, 0.3, size=w_len)
-    sweep = np.sin(2 * np.pi * (280 - 180 * (w_t / whoosh_dur)) * w_t)
+    noise = np.random.uniform(-0.35, 0.35, size=w_len)
+    sweep = np.sin(2 * np.pi * (260 - 160 * (w_t / whoosh_dur)) * w_t)
     whoosh_sfx = (noise * 0.65 + sweep * 0.35) * bell * 0.55
 
     for cut_t in cut_timestamps:
@@ -147,37 +150,44 @@ def build_interstellar_soundtrack(duration_sec: float, cut_timestamps: list, des
     ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # -------------------------------------------------------------
-# 3. HIGH-SPEED IMAGE DOWNLOADER WITH GUARANTEE
+# 3. REPLICATE FLUX AI IMAGE GENERATOR
 # -------------------------------------------------------------
-def download_image_safe(url: str, dest_path: str):
-    headers = {
-        "User-Agent": "MyDocuBot/1.0 (zeshansaleem3311@gmail.com)"
-    }
-    success = False
+def generate_flux_image(prompt: str, dest_path: str):
+    """Uses Replicate's high-speed FLUX.1-schnell model to create 100% custom 4K art"""
     try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=15) as response, open(dest_path, "wb") as f:
-            f.write(response.read())
-        if os.path.exists(dest_path) and os.path.getsize(dest_path) > 5000:
-            success = True
+        output = replicate.run(
+            "black-forest-labs/flux-schnell",
+            input={
+                "prompt": prompt,
+                "aspect_ratio": "16:9",
+                "output_format": "jpg",
+                "output_quality": 95
+            }
+        )
+        # Output is a FileOutput / URL
+        img_url = str(output[0])
+        req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=30) as resp, open(dest_path, "wb") as f:
+            f.write(resp.read())
+        print(f"✅ AI Image Generated Successfully: {dest_path}")
+        return True
     except Exception as e:
-        print(f"⚠️ Note ({e}), auto-creating deep space canvas...")
-
-    if not success:
+        print(f"⚠️ Replicate error ({e}), creating atmospheric canvas...")
         canvas = np.zeros((1080, 1920, 3), dtype=np.uint8)
         grad = np.linspace(0, 1, 1080)[:, None]
-        canvas[:, :, 0] = np.clip(30 + grad * 40, 0, 255).astype(np.uint8)
-        canvas[:, :, 1] = np.clip(15 + grad * 25, 0, 255).astype(np.uint8)
-        canvas[:, :, 2] = np.clip(25 + grad * 35, 0, 255).astype(np.uint8)
+        canvas[:, :, 0] = np.clip(35 + grad * 35, 0, 255).astype(np.uint8)
+        canvas[:, :, 1] = np.clip(20 + grad * 25, 0, 255).astype(np.uint8)
+        canvas[:, :, 2] = np.clip(15 + grad * 25, 0, 255).astype(np.uint8)
         cv2.imwrite(dest_path, canvas)
+        return False
 
 # -------------------------------------------------------------
-# 4. CINEMATIC RENDERER WITH STARDUST PARTICLES & GOLD TEXT
+# 4. CINEMATIC RENDERER WITH PARTICLES & BIG IMPACT TEXT
 # -------------------------------------------------------------
-def render_space_scene_clip(img_path: str, title: str, sub: str, mode: str, duration: float, out_path: str, seed: int):
+def render_pro_scene_clip(img_path: str, title: str, sub: str, mode: str, duration: float, out_path: str, seed: int):
     img = cv2.imread(img_path)
     if img is None:
-        img = np.full((1080, 1920, 3), (25, 15, 20), dtype=np.uint8)
+        img = np.full((1080, 1920, 3), (30, 20, 15), dtype=np.uint8)
     else:
         h, w = img.shape[:2]
         scale = max(1920 / w, 1080 / h)
@@ -193,28 +203,28 @@ def render_space_scene_clip(img_path: str, title: str, sub: str, mode: str, dura
     cv2.rectangle(overlay, (0, 0), (1920, 75), (0, 0, 0), -1)       # Top letterbox
     cv2.addWeighted(overlay, 0.72, img, 0.28, 0, img)
 
-    # Signature Electric Blue / Gold Accent Bar
-    cv2.rectangle(img, (75, 905), (82, 1045), (255, 180, 0), -1)
+    # Signature Amber Accent Bar
+    cv2.rectangle(img, (75, 905), (82, 1045), (0, 140, 255), -1)
 
-    # Big Bold Impact Typography
+    # Big Bold Impact Captions
     cv2.putText(img, title, (108, 955), cv2.FONT_HERSHEY_DUPLEX, 1.35, (0, 0, 0), 5, cv2.LINE_AA)
     cv2.putText(img, title, (105, 952), cv2.FONT_HERSHEY_DUPLEX, 1.35, (255, 255, 255), 2, cv2.LINE_AA)
     cv2.putText(img, sub, (108, 1018), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (0, 0, 0), 4, cv2.LINE_AA)
-    cv2.putText(img, sub, (105, 1015), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (0, 220, 255), 2, cv2.LINE_AA)
+    cv2.putText(img, sub, (105, 1015), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (0, 215, 255), 2, cv2.LINE_AA)
 
     fps = 30
     total_frames = max(1, int(duration * fps))
 
-    # Floating Cosmic Stardust Particles
+    # Floating Snow/Embers Particles
     np.random.seed(seed)
-    num_particles = 45
+    num_particles = 40
     particles = []
     for _ in range(num_particles):
         particles.append({
             "x": np.random.uniform(0, 1920),
             "y": np.random.uniform(0, 1080),
-            "speed_y": np.random.uniform(0.8, 2.5),
-            "speed_x": np.random.uniform(-0.8, 0.8),
+            "speed_y": np.random.uniform(1.2, 3.2),
+            "speed_x": np.random.uniform(-1.0, 1.0),
             "radius": np.random.uniform(2, 5)
         })
 
@@ -224,7 +234,6 @@ def render_space_scene_clip(img_path: str, title: str, sub: str, mode: str, dura
     for f in range(total_frames):
         p = f / max(1, total_frames - 1)
         
-        # Smooth Zoom In or Zoom Out (Sub-pixel linear)
         if mode == "zoom_in":
             zoom = 1.0 + 0.12 * p
         else:
@@ -238,52 +247,53 @@ def render_space_scene_clip(img_path: str, title: str, sub: str, mode: str, dura
         cropped = img[cy:cy + ch, cx:cx + cw]
         frame = cv2.resize(cropped, (1920, 1080), interpolation=cv2.INTER_LINEAR)
 
-        # Draw Stardust particles
+        # Draw Dynamic Atmospheric Particles
         for pt in particles:
             pt["y"] += pt["speed_y"]
             pt["x"] += pt["speed_x"]
             if pt["y"] > 1080: pt["y"] = 0
             if pt["x"] < 0: pt["x"] = 1920
             if pt["x"] > 1920: pt["x"] = 0
-            cv2.circle(frame, (int(pt["x"]), int(pt["y"])), int(pt["radius"]), (255, 255, 230), -1)
+            cv2.circle(frame, (int(pt["x"]), int(pt["y"])), int(pt["radius"]), (240, 245, 255), -1)
 
         vw.write(frame)
 
     vw.release()
 
 # -------------------------------------------------------------
-# 5. MASTER COMPOSITION
+# 5. MASTER PRODUCTION PIPELINE
 # -------------------------------------------------------------
-def build_space_masterpiece():
+def build_pro_ai_documentary():
     print("=" * 65)
-    print("🚀 BUILDING 100% SCRIPT-ACCURATE SPACE DOCUMENTARY")
+    print("🚀 PRODUCING EXTREME TIER FLUX AI DOCUMENTARY...")
     print("=" * 65)
 
     work_dir = "output"
     os.makedirs(work_dir, exist_ok=True)
 
     # 1. Record Urdu Voiceover
-    voice_file = os.path.join(work_dir, "space_narration.mp3")
+    voice_file = os.path.join(work_dir, "ai_narration.mp3")
     asyncio.run(record_full_voice(DOC_SCRIPT, voice_file))
     total_audio_dur = get_audio_duration(voice_file)
-    print(f"🎙️ Narration Duration: {total_audio_dur:.1f}s")
+    print(f"🎙️ Narration Recorded: {total_audio_dur:.1f}s")
 
-    num_scenes = len(SPACE_SCENES)
+    num_scenes = len(AI_SCENES)
     clip_dur = total_audio_dur / num_scenes
     print(f"⚡ Fast Pacing: {clip_dur:.2f}s per scene (Total {num_scenes} Cuts)!")
 
-    # 2. Render Each NASA Scene
+    # 2. Generate Real FLUX AI Images & Render Motion Clips
     clip_files = []
     cut_timestamps = []
     current_time = 0.0
 
-    for idx, sc in enumerate(SPACE_SCENES):
-        print(f"🪐 Scene {idx+1}/{num_scenes} [{sc['mode']}]: {sc['title']}...")
-        img_file = os.path.join(work_dir, f"nasa_{idx}.jpg")
+    for idx, sc in enumerate(AI_SCENES):
+        print(f"\n🎨 [AI Generating Scene {idx+1}/{num_scenes}]: {sc['title']}...")
+        img_file = os.path.join(work_dir, f"flux_{idx}.jpg")
         clip_file = os.path.join(work_dir, f"clip_{idx}.mp4")
 
-        download_image_safe(sc["url"], img_file)
-        render_space_scene_clip(img_file, sc["title"], sc["sub"], sc["mode"], clip_dur, clip_file, seed=idx * 23)
+        # Generate fresh 4K image with Replicate FLUX
+        generate_flux_image(sc["prompt"], img_file)
+        render_pro_scene_clip(img_file, sc["title"], sc["sub"], sc["mode"], clip_dur, clip_file, seed=idx * 19)
         clip_files.append(clip_file)
 
         if idx > 0:
@@ -307,9 +317,9 @@ def build_space_masterpiece():
     ], check=True)
 
     # 4. Generate Soundtrack with Auto-Whoosh SFX
-    bgm_path = os.path.join(work_dir, "interstellar_soundtrack.wav")
-    print(f"🔊 Synthesizing Interstellar Score + {len(cut_timestamps)} Transition WHOOSH Effects...")
-    build_interstellar_soundtrack(total_audio_dur + 2.0, cut_timestamps, bgm_path)
+    bgm_path = os.path.join(work_dir, "soundtrack.wav")
+    print(f"🔊 Synthesizing Soundtrack + {len(cut_timestamps)} Transition WHOOSH Effects...")
+    build_pro_soundtrack(total_audio_dur + 2.0, cut_timestamps, bgm_path)
 
     # 5. Final Audio & Video Merge
     final_output = os.path.join(work_dir, "final_video.mp4")
@@ -332,8 +342,8 @@ def build_space_masterpiece():
 
     size_mb = os.path.getsize(final_output) / (1024 * 1024)
     print("=" * 65)
-    print(f"🎉 100% PERFECT MASTERPIECE READY: {final_output} ({size_mb:.2f} MB)")
+    print(f"🎉 EXTREME TIER FLUX AI DOCUMENTARY READY: {final_output} ({size_mb:.2f} MB)")
     print("=" * 65)
 
 if __name__ == "__main__":
-    build_space_masterpiece()
+    build_pro_ai_documentary()
