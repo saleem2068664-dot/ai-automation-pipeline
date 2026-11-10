@@ -21,73 +21,72 @@ DOC_SCRIPT = (
     "ہمارے آباؤ اجداد اس کٹھن دور میں زندہ رہے، اسی لیے آج ہم اور آپ یہاں موجود ہیں!"
 )
 
-# Har scene ke liye FLUX AI 4K Photorealistic Prompts (100% Script Matched)
 AI_SCENES = [
     {
         "title": "THE FROZEN AWAKENING",
         "sub": "20,000 SAAL PEHLE KI BARFANI DUNIYA",
         "mode": "zoom_in",
-        "prompt": "hyper-realistic 8k cinematic concept art, lone person waking up in a massive arctic snow blizzard, frozen eyelashes, dramatic lighting, national geographic 4k"
+        "prompt": "cinematic national geographic photography of a lone explorer waking up in a massive arctic blizzard ice age, photorealistic 8k"
     },
     {
         "title": "DEADLY SILENCE",
         "sub": "KHOFNAK KHAMOSHI AUR SHADEED THAND",
         "mode": "zoom_out",
-        "prompt": "extreme wide shot of colossal frozen glaciers and ice mountains 20000 bc ice age, eerie atmospheric fog, volumetric winter sunlight, highly detailed 8k"
+        "prompt": "wide shot of colossal frozen glaciers and ice mountains during the ice age, atmospheric winter mist, cinematic 8k"
     },
     {
         "title": "SUB-ZERO REALITY",
         "sub": "DARJA-E-HARARAT MANFI 30 DEGREES",
         "mode": "zoom_in",
-        "prompt": "close up of frozen frost crystals forming on ancient rocks in blizzard, sub-zero harsh winter wasteland, cinematic photography 8k"
+        "prompt": "macro detailed photography of frozen blue ice crystals forming on ancient rocks in blizzard, sub-zero harsh wilderness 8k"
     },
     {
         "title": "THE WOOLLY MAMMOTH",
         "sub": "DIWA-HAIKAL MAMMOTH AUR SHIKARI",
         "mode": "zoom_out",
-        "prompt": "giant woolly mammoth with massive curved tusks walking through deep snow storm, hyper-realistic fur textures, epic cinematic composition 8k"
+        "prompt": "massive woolly mammoth with gigantic curved tusks walking through deep snow storm, hyper-realistic fur textures, epic cinematic 8k"
     },
     {
         "title": "TRACKS IN THE SNOW",
         "sub": "BARF MAIN GEHRE KHOJ",
         "mode": "zoom_in",
-        "prompt": "deep animal and human footprints in fresh pristine white snow leading towards a dark cliff, atmospheric cold mist 8k"
+        "prompt": "deep animal and human footprints in fresh white snow leading towards a dark mountain cliff, atmospheric cold lighting 8k"
     },
     {
         "title": "LOST IN PREHISTORY",
         "sub": "NA KOI MOBILE, NA KAPRE, NA MADAD",
         "mode": "zoom_out",
-        "prompt": "a primitive survivalist shivering in heavy raw animal hides looking across a vast prehistoric mountain valley, hyper-realistic, dramatic moody lighting"
+        "prompt": "a primitive hunter shivering in heavy animal fur skins looking across a vast prehistoric mountain valley, dramatic lighting 8k"
     },
     {
         "title": "THE CAVE ENTRANCE",
         "sub": "DOOR PAHAD KI GEHRI GHAAR",
         "mode": "zoom_in",
-        "prompt": "exterior shot of an ancient stone cave entrance carved into high mountain cliff with faint warm orange glow inside, dark winter twilight 8k"
+        "prompt": "exterior shot of an ancient dark stone cave entrance in a snow-covered cliff with warm orange fire light inside, dusk 8k"
     },
     {
         "title": "THE PRIMAL FIRE",
         "sub": "ZINDAGI AUR MAUT KA FAISLA: AAG!",
         "mode": "zoom_out",
-        "prompt": "close up of a roaring warm prehistoric campfire inside a dark cave, crackling amber sparks and glowing embers, hyper-realistic national geographic style 8k"
+        "prompt": "roaring warm prehistoric campfire inside a dark cave, crackling amber sparks and glowing embers, hyper-realistic national geographic 8k"
     },
     {
         "title": "ICE AGE CLAN",
         "sub": "PATTHAR KE HATHIYAR LIYE QADEEM INSAAN",
         "mode": "zoom_in",
-        "prompt": "stone age paleolithic hunter gatherers holding stone spears gathered around cave fire, rugged intense faces, painted cave walls, photorealistic 8k"
+        "prompt": "paleolithic stone age tribe holding stone spears gathered around cave fire, intense detailed faces, painted cave walls 8k"
     },
     {
         "title": "THE SURVIVAL NIGHT",
         "sub": "AGAR DOSTI HUI TO BACHENGE",
         "mode": "zoom_out",
-        "prompt": "dramatic silhouettes of ancient hunters standing on a snowy mountain ridge under a fierce howling blizzard storm, cinematic depth of field 8k"
+        "prompt": "dramatic silhouettes of ancient hunters on a snowy mountain ridge under a fierce blizzard storm, cinematic depth of field 8k"
     },
     {
         "title": "DAWN OF HUMANITY",
         "sub": "HUMARE ABA-O-AJDAD NE YEH JANG JEETI",
         "mode": "zoom_in",
-        "prompt": "majestic ancient starry cosmos and milky way sky shining bright over snow-capped mountains, dawn sun rising on the horizon, breathtaking cinematic 8k"
+        "prompt": "majestic ancient starry cosmos and milky way sky shining bright over snow-capped mountains, dawn sun rising on horizon 8k"
     }
 ]
 
@@ -150,11 +149,15 @@ def build_pro_soundtrack(duration_sec: float, cut_timestamps: list, dest_path: s
     ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # -------------------------------------------------------------
-# 3. REPLICATE FLUX AI IMAGE GENERATOR
+# 3. DIRECT REPLICATE FLUX AI IMAGE GENERATOR
 # -------------------------------------------------------------
 def generate_flux_image(prompt: str, dest_path: str):
-    """Uses Replicate's high-speed FLUX.1-schnell model to create 100% custom 4K art"""
+    token = os.environ.get("REPLICATE_API_TOKEN", "")
+    if not token:
+        print("❌ WARNING: REPLICATE_API_TOKEN is empty! Make sure GitHub Secret is added.")
+
     try:
+        print(f"🚀 Calling Replicate FLUX.1-schnell for: '{prompt[:45]}...'")
         output = replicate.run(
             "black-forest-labs/flux-schnell",
             input={
@@ -164,15 +167,21 @@ def generate_flux_image(prompt: str, dest_path: str):
                 "output_quality": 95
             }
         )
-        # Output is a FileOutput / URL
-        img_url = str(output[0])
-        req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp, open(dest_path, "wb") as f:
-            f.write(resp.read())
-        print(f"✅ AI Image Generated Successfully: {dest_path}")
+        
+        # Save image output (supports both direct FileOutput stream and URL)
+        item = output[0] if isinstance(output, (list, tuple)) else output
+        with open(dest_path, "wb") as f:
+            if hasattr(item, "read"):
+                f.write(item.read())
+            else:
+                req = urllib.request.Request(str(item), headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req) as resp:
+                    f.write(resp.read())
+                    
+        print(f"✅ AI 4K Image Generated: {dest_path} ({os.path.getsize(dest_path) // 1024} KB)")
         return True
     except Exception as e:
-        print(f"⚠️ Replicate error ({e}), creating atmospheric canvas...")
+        print(f"⚠️ Replicate call detail: {e}")
         canvas = np.zeros((1080, 1920, 3), dtype=np.uint8)
         grad = np.linspace(0, 1, 1080)[:, None]
         canvas[:, :, 0] = np.clip(35 + grad * 35, 0, 255).astype(np.uint8)
@@ -197,16 +206,13 @@ def render_pro_scene_clip(img_path: str, title: str, sub: str, mode: str, durati
         sy = (new_h - 1080) // 2
         img = img[sy:sy + 1080, sx:sx + 1920]
 
-    # Pre-render Big Bold Letterbox & Signature Typography
     overlay = img.copy()
-    cv2.rectangle(overlay, (0, 880), (1920, 1080), (0, 0, 0), -1)  # Bottom banner
-    cv2.rectangle(overlay, (0, 0), (1920, 75), (0, 0, 0), -1)       # Top letterbox
+    cv2.rectangle(overlay, (0, 880), (1920, 1080), (0, 0, 0), -1)
+    cv2.rectangle(overlay, (0, 0), (1920, 75), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.72, img, 0.28, 0, img)
 
-    # Signature Amber Accent Bar
     cv2.rectangle(img, (75, 905), (82, 1045), (0, 140, 255), -1)
 
-    # Big Bold Impact Captions
     cv2.putText(img, title, (108, 955), cv2.FONT_HERSHEY_DUPLEX, 1.35, (0, 0, 0), 5, cv2.LINE_AA)
     cv2.putText(img, title, (105, 952), cv2.FONT_HERSHEY_DUPLEX, 1.35, (255, 255, 255), 2, cv2.LINE_AA)
     cv2.putText(img, sub, (108, 1018), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (0, 0, 0), 4, cv2.LINE_AA)
@@ -215,7 +221,6 @@ def render_pro_scene_clip(img_path: str, title: str, sub: str, mode: str, durati
     fps = 30
     total_frames = max(1, int(duration * fps))
 
-    # Floating Snow/Embers Particles
     np.random.seed(seed)
     num_particles = 40
     particles = []
@@ -247,7 +252,6 @@ def render_pro_scene_clip(img_path: str, title: str, sub: str, mode: str, durati
         cropped = img[cy:cy + ch, cx:cx + cw]
         frame = cv2.resize(cropped, (1920, 1080), interpolation=cv2.INTER_LINEAR)
 
-        # Draw Dynamic Atmospheric Particles
         for pt in particles:
             pt["y"] += pt["speed_y"]
             pt["x"] += pt["speed_x"]
@@ -271,7 +275,6 @@ def build_pro_ai_documentary():
     work_dir = "output"
     os.makedirs(work_dir, exist_ok=True)
 
-    # 1. Record Urdu Voiceover
     voice_file = os.path.join(work_dir, "ai_narration.mp3")
     asyncio.run(record_full_voice(DOC_SCRIPT, voice_file))
     total_audio_dur = get_audio_duration(voice_file)
@@ -281,7 +284,6 @@ def build_pro_ai_documentary():
     clip_dur = total_audio_dur / num_scenes
     print(f"⚡ Fast Pacing: {clip_dur:.2f}s per scene (Total {num_scenes} Cuts)!")
 
-    # 2. Generate Real FLUX AI Images & Render Motion Clips
     clip_files = []
     cut_timestamps = []
     current_time = 0.0
@@ -291,7 +293,6 @@ def build_pro_ai_documentary():
         img_file = os.path.join(work_dir, f"flux_{idx}.jpg")
         clip_file = os.path.join(work_dir, f"clip_{idx}.mp4")
 
-        # Generate fresh 4K image with Replicate FLUX
         generate_flux_image(sc["prompt"], img_file)
         render_pro_scene_clip(img_file, sc["title"], sc["sub"], sc["mode"], clip_dur, clip_file, seed=idx * 19)
         clip_files.append(clip_file)
@@ -300,7 +301,6 @@ def build_pro_ai_documentary():
             cut_timestamps.append(current_time)
         current_time += clip_dur
 
-    # 3. Stitch Scenes
     concat_txt = os.path.join(work_dir, "concat.txt")
     with open(concat_txt, "w") as f:
         for cf in clip_files:
@@ -316,12 +316,10 @@ def build_pro_ai_documentary():
         video_only
     ], check=True)
 
-    # 4. Generate Soundtrack with Auto-Whoosh SFX
     bgm_path = os.path.join(work_dir, "soundtrack.wav")
     print(f"🔊 Synthesizing Soundtrack + {len(cut_timestamps)} Transition WHOOSH Effects...")
     build_pro_soundtrack(total_audio_dur + 2.0, cut_timestamps, bgm_path)
 
-    # 5. Final Audio & Video Merge
     final_output = os.path.join(work_dir, "final_video.mp4")
     cmd_master = [
         "ffmpeg", "-y",
