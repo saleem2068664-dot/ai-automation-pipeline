@@ -1,7 +1,7 @@
 import os
 import subprocess
 import asyncio
-import requests
+import urllib.request
 import numpy as np
 import edge_tts
 
@@ -16,37 +16,31 @@ DOC_SCRIPT = (
     "سمندر صرف پانی نہیں، بلکہ نامعلوم رازوں کی ایک نہ ختم ہونے والی داستان ہے!"
 )
 
-VOICE_ACTOR = "ur-PK-AsadNeural"  # Professional Urdu Narration
+VOICE_ACTOR = "ur-PK-AsadNeural"
 
 # -------------------------------------------------------------
 # 2. HD PEXELS DIRECT DOCUMENTARY VIDEO CLIPS
 # -------------------------------------------------------------
-# Real high-resolution Pexels documentary clips (Ocean Depths, Waves, Bioluminescence)
 PEXELS_CLIPS = [
     {
         "url": "https://videos.pexels.com/video-files/856381/856381-hd_1920_1080_30fps.mp4",
-        "duration": 12,
-        "title": "Ocean Surface & Waves"
+        "title": "Ocean Surface"
     },
     {
         "url": "https://videos.pexels.com/video-files/3015510/3015510-hd_1920_1080_24fps.mp4",
-        "duration": 12,
         "title": "Diving into Deep Blue"
     },
     {
         "url": "https://videos.pexels.com/video-files/3163534/3163534-hd_1920_1080_30fps.mp4",
-        "duration": 12,
-        "title": "Mysterious Underwater Reef"
+        "title": "Underwater Reef"
     },
     {
         "url": "https://videos.pexels.com/video-files/2439510/2439510-hd_1920_1080_30fps.mp4",
-        "duration": 12,
-        "title": "Deep Water Currents & Sunrays"
+        "title": "Sunrays underwater"
     },
     {
         "url": "https://videos.pexels.com/video-files/1448735/1448735-hd_1920_1080_24fps.mp4",
-        "duration": 14,
-        "title": "Abyss & Infinite Ocean Horizon"
+        "title": "Infinite Ocean Abyss"
     }
 ]
 
@@ -54,29 +48,23 @@ PEXELS_CLIPS = [
 # 3. HELPER FUNCTIONS
 # -------------------------------------------------------------
 async def generate_urdu_narration(text: str, output_path: str):
-    print("🎙️ Generating 60-Second Professional Urdu Narration...")
+    print("🎙️ Generating 60-Second Urdu Narration...")
     communicate = edge_tts.Communicate(text, VOICE_ACTOR, rate="-2%", pitch="-1Hz")
     await communicate.save(output_path)
 
 def download_file(url: str, dest_path: str):
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    with requests.get(url, headers=headers, stream=True, timeout=60) as r:
-        r.raise_for_status()
-        with open(dest_path, "wb") as f:
-            for chunk in r.iter_content(chunk_size=65536):
-                f.write(chunk)
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req) as response, open(dest_path, "wb") as out_file:
+        out_file.write(response.read())
 
 def create_cinematic_bgm(duration_sec: float, sample_rate: int = 44100) -> np.ndarray:
-    """Generates a deep, mysterious National Geographic style ambient drone soundtrack"""
     t = np.linspace(0, duration_sec, int(sample_rate * duration_sec), endpoint=False)
-    # Deep cello/drone sub-bass (C2 = 65.4 Hz, G2 = 98.0 Hz, D#3 = 155.6 Hz)
     drone = (
         0.25 * np.sin(2 * np.pi * 65.41 * t) +
         0.20 * np.sin(2 * np.pi * 98.00 * t) +
         0.15 * np.sin(2 * np.pi * 155.56 * t) +
         0.08 * np.sin(2 * np.pi * 196.00 * t)
     )
-    # Ambient swell modulation
     swell = 0.6 + 0.4 * np.sin(2 * np.pi * 0.08 * t)
     bgm = drone * swell
     bgm = bgm / (np.max(np.abs(bgm)) + 1e-6) * 0.28
@@ -93,11 +81,10 @@ def build_1minute_documentary():
     work_dir = "output"
     os.makedirs(work_dir, exist_ok=True)
 
-    # 1. Generate Urdu Voiceover
+    # 1. Voiceover
     voice_file = os.path.join(work_dir, "doc_narration.mp3")
     asyncio.run(generate_urdu_narration(DOC_SCRIPT, voice_file))
 
-    # Find exact duration of generated voiceover using ffprobe
     probe_cmd = [
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1", voice_file
@@ -109,7 +96,7 @@ def build_1minute_documentary():
 
     print(f"⏱️ Narration Duration: {voice_duration:.1f} seconds")
 
-    # 2. Generate Cinematic Ambient BGM
+    # 2. Ambient BGM
     bgm_wav = os.path.join(work_dir, "cinematic_bgm.wav")
     raw_pcm = os.path.join(work_dir, "bgm.raw")
     bgm_data = create_cinematic_bgm(voice_duration + 2.0)
@@ -119,9 +106,9 @@ def build_1minute_documentary():
         "-i", raw_pcm, bgm_wav
     ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    # 3. Download & Process Pexels Video Clips
+    # 3. Download & Format Clips
     clip_files = []
-    clip_dur = voice_duration / len(PEXELS_CLIPS) + 0.5
+    clip_dur = (voice_duration / len(PEXELS_CLIPS)) + 0.5
 
     for idx, item in enumerate(PEXELS_CLIPS):
         raw_clip = os.path.join(work_dir, f"raw_clip_{idx}.mp4")
@@ -130,7 +117,6 @@ def build_1minute_documentary():
         print(f"📥 Downloading Pexels Clip {idx+1}/{len(PEXELS_CLIPS)}: {item['title']}...")
         download_file(item["url"], raw_clip)
 
-        # Standardize clip to 1080p 30fps with subtle slow zoom (Ken Burns)
         cmd_trim = [
             "ffmpeg", "-y",
             "-ss", "0",
@@ -145,7 +131,7 @@ def build_1minute_documentary():
         subprocess.run(cmd_trim, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         clip_files.append(processed_clip)
 
-    # 4. Concatenate All Clips into One Visual Sequence
+    # 4. Stitch Clips
     concat_list = os.path.join(work_dir, "concat_list.txt")
     with open(concat_list, "w") as f:
         for c in clip_files:
@@ -160,7 +146,7 @@ def build_1minute_documentary():
         stitched_video
     ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-    # 5. Final Audio Mix (Voiceover 100% + Ambient BGM 25%) + Video
+    # 5. Final Audio-Video Multiplex
     final_video = os.path.join(work_dir, "final_video.mp4")
     print("🎬 Rendering Final 1-Minute Documentary with Studio Audio...")
     final_cmd = [
