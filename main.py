@@ -7,58 +7,106 @@ import urllib.request
 import edge_tts
 
 # -------------------------------------------------------------
-# 1. EXACT @HIDDENWHYPROJECT NARRATIVE STORYBOARD
+# 1. FAST-PACED SCRIPT & 16 DYNAMIC 2.5-SECOND SCENES
 # -------------------------------------------------------------
-HIDDEN_WHY_SCENES = [
+DOC_SCRIPT = (
+    "تصور کریں، اگر آپ اچانک بیس ہزار سال پیچھے برفانی دور میں آنکھ کھولیں! "
+    "سب سے پہلی چیز جو آپ کو محسوس ہوگی وہ شدید ٹھنڈ نہیں... بلکہ ایک پراسرار خاموشی ہوگی۔ "
+    "یہاں درجہ حرارت منفی تیس ڈگری ہے، اور زمین پر میلوں دور تک صرف برف کی چادر پھیلی ہے۔ "
+    "دور افق پر آپ کو دیوہیکل میمتھ اور خونخوار شکاری جانوروں کے سائے نظر آتے ہیں۔ "
+    "نہ کوئی موبائل، نہ ہسپتال، نہ ماڈرن کپڑے۔ آپ کی واحد امید دور کسی غار میں جلتی ہوئی وہ آگ ہے! "
+    "جہاں قدیم قبائلی انسان پتھر کے ہتھیار لیے جمع ہیں۔ "
+    "اگر آپ نے ان سے دوستی کر لی تو بچ جائیں گے، ورنہ یہ وحشی رات آپ کو ہمیشہ کے لیے جما دے گی۔ "
+    "ہمارے آباؤ اجداد اس کٹھن دور میں زندہ رہے، اسی لیے آج ہم اور آپ یہاں موجود ہیں!"
+)
+
+# 16 Rapid Scenes (Every ~2.8 to 3.2 seconds = Visual Cut)
+FAST_SCENES = [
     {
-        "id": "scene1_awakening",
         "title": "THE FROZEN AWAKENING",
-        "sub": "TASAWWUR KAREIN AAP 20,000 SAAL PEHLE JAAGTE HAIN...",
-        "text": "تصور کریں، اگر آپ اچانک بیس ہزار سال پیچھے برفانی دور میں آنکھ کھولیں! سب سے پہلی چیز جو آپ کو محسوس ہوگی وہ سردی نہیں... بلکہ ایک خوفناک خاموشی ہوگی۔",
-        "image_url": "https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?w=1920&q=80"  # Dramatic Ice Blizzard Mountain
+        "sub": "20,000 SAAL PEHLE KI BARFANI DUNIYA",
+        "mode": "zoom_in",
+        "url": "https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?w=1920&q=80"  # Blizzard
     },
     {
-        "id": "scene2_mammoth",
-        "title": "GIANTS OF THE ICE AGE",
-        "sub": "YEH DUNIYA KHOONKHAAR JANWARON KI THI",
-        "text": "یہاں درجہ حرارت منفی تیس ڈگری ہے، اور افق پر آپ کو دیوہیکل میمتھ اور خطرناک شکاری جانوروں کے سائے نظر آتے ہیں۔",
-        "image_url": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80"  # Epic Cold Glacial Wilderness
+        "title": "ABSOLUTE SILENCE",
+        "sub": "KHOFNAK KHAMOSHI AUR SHADEED THAND",
+        "mode": "zoom_out",
+        "url": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80"  # Giant Glaciers
     },
     {
-        "id": "scene3_fire_cave",
-        "title": "THE ONLY HOPE: FIRE",
-        "sub": "AAG HI ZINDAGI AUR MAUT KA FAISLA THI",
-        "text": "نہ کوئی موبائل، نہ ہسپتال، نہ ماڈرن کپڑے۔ آپ کی واحد امید دور کسی غار میں جلتی ہوئی وہ آگ ہے جہاں قدیم قبائلی انسان جمع ہیں۔",
-        "image_url": "https://images.unsplash.com/photo-1499244571948-7ccddb3583f1?w=1920&q=80"  # Primal Campfire in Dark Cave
+        "title": "SUB-ZERO TEMPERATURES",
+        "sub": "DARJA-E-HARARAT MANFI 30 DEGREES",
+        "mode": "zoom_in",
+        "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=80"  # Frost Texture
     },
     {
-        "id": "scene4_survival",
-        "title": "SURVIVING THE FIRST NIGHT",
-        "sub": "AGAR AAP NE PEHLI RAAT GUZAAR LI...",
-        "text": "اگر آپ ان سے دوستی کر سکے تو بچ جائیں گے، ورنہ یہ وحشی رات آپ کو ہمیشہ کے لیے جما دے گی۔",
-        "image_url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=1920&q=80"  # Dark Mysterious Foggy Forest
+        "title": "GIANT PREHISTORIC BEASTS",
+        "sub": "DIWA-HAIKAL MAMMOTH AUR SHIKARI JANWAR",
+        "mode": "zoom_out",
+        "url": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=1920&q=80"  # Apex Beast
     },
     {
-        "id": "scene5_stars_destiny",
-        "title": "THE ROOT OF HUMANITY",
-        "sub": "HUMARE BAAP DADA IS KHOFNAK DOUR SE GUZRE THAY",
-        "text": "ہمارے آباؤ اجداد اس کٹھن دور میں زندہ رہے، اسی لیے آج ہم اور آپ یہاں موجود ہیں!",
-        "image_url": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=1920&q=80"  # Majestic Primal Starry Cosmos
+        "title": "TRACKS IN THE SNOW",
+        "sub": "BARF MAIN GEHRE KHOJ",
+        "mode": "zoom_in",
+        "url": "https://images.unsplash.com/photo-1516715094483-75da7dee9758?w=1920&q=80"  # Snow tracks
+    },
+    {
+        "title": "NO MODERN TECHNOLOGY",
+        "sub": "NA KOI MOBILE, NA KAPRE, NA MADAD",
+        "mode": "zoom_out",
+        "url": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=1920&q=80"  # Lost Wilderness
+    },
+    {
+        "title": "THE MYSTERIOUS CAVE",
+        "sub": "DOOR PAHAD KI GEHRI GHAAR",
+        "mode": "zoom_in",
+        "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=80"  # Dark cavern
+    },
+    {
+        "title": "THE PRIMAL FIRE",
+        "sub": "ZINDAGI AUR MAUT KA FAISLA: AAG!",
+        "mode": "zoom_out",
+        "url": "https://images.unsplash.com/photo-1499244571948-7ccddb3583f1?w=1920&q=80"  # Campfire
+    },
+    {
+        "title": "ANCIENT HUNTERS",
+        "sub": "PATTHAR KE HATHIYAR LIYE QADEEM INSAAN",
+        "mode": "zoom_in",
+        "url": "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1920&q=80"  # Ancient silhouette
+    },
+    {
+        "title": "SURVIVAL INSTINCT",
+        "sub": "AGAR DOSTI HUI TO BACHENGE",
+        "mode": "zoom_out",
+        "url": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80"  # Mountain ridge
+    },
+    {
+        "title": "THE ENDLESS COLD NIGHT",
+        "sub": "YEH RAAT AP KO JAMA DE GI",
+        "mode": "zoom_in",
+        "url": "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?w=1920&q=80"  # Cold night blizzard
+    },
+    {
+        "title": "THE DAWN OF HUMANITY",
+        "sub": "HUMARE ABA-O-AJDAD NE YEH JANG JEETI",
+        "mode": "zoom_out",
+        "url": "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=1920&q=80"  # Cosmic starry night
     }
 ]
 
-# Deep, serious, mysterious narrator voice
 VOICE_NAME = "ur-PK-AsadNeural"
 
 # -------------------------------------------------------------
-# 2. AUDIO & ATMOSPHERIC SOUND DESIGN
+# 2. AUDIO GENERATION
 # -------------------------------------------------------------
-async def record_narration(text: str, out_path: str):
-    # -4% rate and -2Hz pitch for that deep documentary suspense
-    comm = edge_tts.Communicate(text, VOICE_NAME, rate="-4%", pitch="-2Hz")
+async def record_full_voice(text: str, out_path: str):
+    print("🎙️ Recording Fast-Paced Suspenseful Urdu Narration...")
+    comm = edge_tts.Communicate(text, VOICE_NAME, rate="-2%", pitch="-2Hz")
     await comm.save(out_path)
 
-def get_duration(file_path: str) -> float:
+def get_audio_duration(file_path: str) -> float:
     cmd = [
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1", file_path
@@ -66,7 +114,7 @@ def get_duration(file_path: str) -> float:
     try:
         return float(subprocess.check_output(cmd).strip())
     except Exception:
-        return 11.0
+        return 45.0
 
 def download_image(url: str, dest_path: str):
     headers = {
@@ -76,36 +124,23 @@ def download_image(url: str, dest_path: str):
     with urllib.request.urlopen(req, timeout=30) as response, open(dest_path, "wb") as f:
         f.write(response.read())
 
-def create_hidden_why_soundtrack(duration_sec: float, dest_path: str):
-    """Deep tense sub-bass drone + howling icy wind tension"""
+def create_suspense_soundtrack(duration_sec: float, dest_path: str):
     sample_rate = 44100
     t = np.linspace(0, duration_sec, int(sample_rate * duration_sec), endpoint=False)
-    
-    # 1. Dark sub-drone (Low C# / G# tension)
+    # Deep sub-drone
     drone = (
-        0.28 * np.sin(2 * np.pi * 48.99 * t) +
-        0.22 * np.sin(2 * np.pi * 73.42 * t) +
-        0.14 * np.sin(2 * np.pi * 110.0 * t)
+        0.28 * np.sin(2 * np.pi * 50.0 * t) +
+        0.20 * np.sin(2 * np.pi * 75.0 * t) +
+        0.12 * np.sin(2 * np.pi * 100.0 * t)
     )
-    drone *= (0.7 + 0.3 * np.sin(2 * np.pi * 0.05 * t))
-    
-    # 2. Wind turbulence / howling noise
-    np.random.seed(101)
-    noise = np.random.uniform(-0.06, 0.06, size=len(t))
-    wind_mod = 0.5 + 0.5 * np.sin(2 * np.pi * 0.12 * t)
-    wind = noise * wind_mod
-
-    # 3. Slow dramatic heartbeat pulse every 2.4 seconds
-    heartbeat = np.zeros_like(t)
-    for hb in np.arange(1.0, duration_sec, 2.4):
-        mask = (t >= hb) & (t < hb + 0.3)
-        dt = t[mask] - hb
-        heartbeat[mask] += 0.22 * np.sin(2 * np.pi * 60.0 * dt) * np.exp(-dt * 14.0)
-
-    score = drone + wind + heartbeat
-    score = score / (np.max(np.abs(score)) + 1e-6) * 0.22
+    drone *= (0.7 + 0.3 * np.sin(2 * np.pi * 0.08 * t))
+    # Subtle wind sweep
+    np.random.seed(42)
+    noise = np.random.uniform(-0.05, 0.05, size=len(t))
+    score = drone + noise
+    score = score / (np.max(np.abs(score)) + 1e-6) * 0.20
     pcm = (score * 32767).astype(np.int16)
-
+    
     raw_path = dest_path + ".raw"
     pcm.tofile(raw_path)
     subprocess.run([
@@ -114,134 +149,123 @@ def create_hidden_why_soundtrack(duration_sec: float, dest_path: str):
     ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # -------------------------------------------------------------
-# 3. @HIDDENWHY CINEMATIC VISUAL FRAME GENERATOR
+# 3. SILKY SMOOTH SUB-PIXEL MOTION ENGINE (ZERO JITTER)
 # -------------------------------------------------------------
-def build_hidden_why_slide(img_path: str, title: str, sub: str, duration: float, out_path: str):
+def render_smooth_motion_clip(img_path: str, title: str, sub: str, mode: str, duration: float, out_path: str):
+    """Renders 100% butter-smooth zoom in / zoom out with sub-pixel bicubic interpolation"""
     img = cv2.imread(img_path)
     if img is None:
-        img = np.full((1080, 1920, 3), (25, 18, 14), dtype=np.uint8)
+        img = np.full((1080, 1920, 3), (30, 20, 15), dtype=np.uint8)
     else:
         h, w = img.shape[:2]
         scale = max(1920 / w, 1080 / h)
         new_w, new_h = int(w * scale), int(h * scale)
         img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
-        start_x = (new_w - 1920) // 2
-        start_y = (new_h - 1080) // 2
-        img = img[start_y:start_y + 1080, start_x:start_x + 1920]
+        sx = (new_w - 1920) // 2
+        sy = (new_h - 1080) // 2
+        img = img[sy:sy + 1080, sx:sx + 1920]
 
-    # --- Dramatic Cinematic Color Grade (Warm Highlights, Cold Shadows) ---
-    img = cv2.convertScaleAbs(img, alpha=1.08, beta=5)
-
-    # --- Cinematic Dark Vignette & Letterbox ---
+    # Pre-render Title & Subtitle Banner
     overlay = img.copy()
-    # Bottom banner for title and sub
-    cv2.rectangle(overlay, (0, 890), (1920, 1080), (0, 0, 0), -1)
-    # Top cinematic film bar
-    cv2.rectangle(overlay, (0, 0), (1920, 75), (0, 0, 0), -1)
-    cv2.addWeighted(overlay, 0.72, img, 0.28, 0, img)
+    cv2.rectangle(overlay, (0, 895), (1920, 1080), (0, 0, 0), -1)
+    cv2.rectangle(overlay, (0, 0), (1920, 70), (0, 0, 0), -1)
+    cv2.addWeighted(overlay, 0.70, img, 0.30, 0, img)
 
-    # Glowing Red/Amber Accent Indicator (Hidden Why signature look)
-    cv2.rectangle(img, (90, 915), (96, 1045), (0, 130, 255), -1)  # Amber-orange bar
+    # Gold/Amber Accent Indicator
+    cv2.rectangle(img, (80, 915), (86, 1045), (0, 140, 255), -1)
+    cv2.putText(img, title, (105, 960), cv2.FONT_HERSHEY_DUPLEX, 1.25, (255, 255, 255), 2, cv2.LINE_AA)
+    cv2.putText(img, sub, (105, 1015), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 215, 255), 2, cv2.LINE_AA)
 
-    # Clean Typography (Modern Sans-Serif + Glowing Subtitles)
-    cv2.putText(img, title, (115, 960), cv2.FONT_HERSHEY_DUPLEX, 1.25, (255, 255, 255), 2, cv2.LINE_AA)
-    cv2.putText(img, sub, (115, 1015), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 215, 255), 2, cv2.LINE_AA)
+    fps = 30
+    total_frames = int(duration * fps)
+    
+    # Write frames directly using OpenCV VideoWriter (Guaranteed Butter-Smooth Motion)
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    vw = cv2.VideoWriter(out_path, fourcc, fps, (1920, 1080))
 
-    temp_slide = out_path + ".jpg"
-    cv2.imwrite(temp_slide, img, [cv2.IMWRITE_JPEG_QUALITY, 96])
+    for f in range(total_frames):
+        p = f / max(1, total_frames - 1)
+        
+        # Calculate dynamic smooth zoom factor (1.0 to 1.12)
+        if mode == "zoom_in":
+            zoom = 1.0 + 0.12 * p
+        else:
+            zoom = 1.12 - 0.12 * p
 
-    # Smooth crossfade in and out (Zero Jitter, Absolute Rock Solid 1080p)
-    cmd = [
-        "ffmpeg", "-y",
-        "-loop", "1",
-        "-i", temp_slide,
-        "-t", str(duration),
-        "-vf", "fade=t=in:st=0:d=0.7,fade=t=out:st=" + str(max(0.1, duration - 0.7)) + ":d=0.7",
-        "-c:v", "libx264",
-        "-preset", "fast",
-        "-crf", "18",
-        "-pix_fmt", "yuv420p",
-        out_path
-    ]
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # Crop around center
+        cw = int(1920 / zoom)
+        ch = int(1080 / zoom)
+        cx = (1920 - cw) // 2
+        cy = (1080 - ch) // 2
+        
+        cropped = img[cy:cy + ch, cx:cx + cw]
+        frame = cv2.resize(cropped, (1920, 1080), interpolation=cv2.INTER_LINEAR)
+        vw.write(frame)
+
+    vw.release()
 
 # -------------------------------------------------------------
-# 4. MASTER BUILD PIPELINE
+# 4. MASTER COMPOSITION
 # -------------------------------------------------------------
-def build_hidden_why_video():
+def build_fast_paced_documentary():
     print("=" * 65)
-    print("🎬 MASTER PRODUCTION: @HIDDENWHYPROJECT STYLE VIDEO")
+    print("🚀 MASTER FAST-PACED DOCUMENTARY (2.5s - 3s CUTS)")
     print("=" * 65)
 
     work_dir = "output"
     os.makedirs(work_dir, exist_ok=True)
 
-    rendered_scenes = []
-    total_duration = 0.0
+    # 1. Voiceover
+    voice_file = os.path.join(work_dir, "doc_narration.mp3")
+    asyncio.run(record_full_voice(DOC_SCRIPT, voice_file))
+    total_audio_dur = get_audio_duration(voice_file)
+    print(f"⏱️ Total Narration: {total_audio_dur:.1f}s")
 
-    for idx, sc in enumerate(HIDDEN_WHY_SCENES):
-        print(f"\n⚡ Scene {idx+1}/{len(HIDDEN_WHY_SCENES)}: {sc['title']}")
-        img_file = os.path.join(work_dir, f"{sc['id']}.jpg")
-        voice_file = os.path.join(work_dir, f"{sc['id']}_voice.mp3")
-        scene_video = os.path.join(work_dir, f"{sc['id']}_video.mp4")
-        scene_final = os.path.join(work_dir, f"{sc['id']}_final.mp4")
+    # Time per visual cut (~2.8s to 3.2s)
+    num_scenes = len(FAST_SCENES)
+    clip_dur = total_audio_dur / num_scenes
+    print(f"⚡ Fast Pacing: Each Scene lasts {clip_dur:.2f} seconds (Total {num_scenes} Cuts)!")
 
-        # 1. Download Epic Scene Concept Art
-        print(f"📥 Downloading Cinematic Visual...")
-        download_image(sc["image_url"], img_file)
+    # 2. Render Each Fast-Paced Motion Scene
+    clip_files = []
+    for idx, sc in enumerate(FAST_SCENES):
+        print(f"🎬 Scene {idx+1}/{num_scenes} [{sc['mode']}]: {sc['title']}...")
+        img_file = os.path.join(work_dir, f"img_{idx}.jpg")
+        clip_file = os.path.join(work_dir, f"clip_{idx}.mp4")
 
-        # 2. Record Narration
-        print(f"🎙️ Recording Deep Dramatic Narration...")
-        asyncio.run(record_narration(sc["text"], voice_file))
-        dur = get_duration(voice_file) + 1.2
-        total_duration += dur
-        print(f"⏱️ Duration: {dur:.1f}s")
+        download_image(sc["url"], img_file)
+        render_smooth_motion_clip(img_file, sc["title"], sc["sub"], sc["mode"], clip_dur, clip_file)
+        clip_files.append(clip_file)
 
-        # 3. Build Slide Video
-        print(f"🎞️ Generating 1080p Film Slide with Letterbox...")
-        build_hidden_why_slide(img_file, sc["title"], sc["sub"], dur, scene_video)
-
-        # 4. Merge Scene
-        cmd_merge = [
-            "ffmpeg", "-y",
-            "-i", scene_video,
-            "-i", voice_file,
-            "-c:v", "copy",
-            "-c:a", "aac",
-            "-b:a", "192k",
-            "-shortest",
-            scene_final
-        ]
-        subprocess.run(cmd_merge, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        rendered_scenes.append(scene_final)
-
-    # 5. Stitch Scenes
-    print("\n🎞️ Stitching Full 1-Minute Timeline...")
+    # 3. Stitch Scenes
     concat_txt = os.path.join(work_dir, "concat.txt")
     with open(concat_txt, "w") as f:
-        for rf in rendered_scenes:
-            f.write(f"file '{os.path.abspath(rf)}'\n")
+        for cf in clip_files:
+            f.write(f"file '{os.path.abspath(cf)}'\n")
 
-    video_only = os.path.join(work_dir, "video_stitched.mp4")
+    video_only = os.path.join(work_dir, "visuals_combined.mp4")
     subprocess.run([
         "ffmpeg", "-y", "-f", "concat", "-safe", "0",
         "-i", concat_txt,
-        "-c", "copy",
+        "-c:v", "libx264",
+        "-preset", "fast",
+        "-pix_fmt", "yuv420p",
         video_only
     ], check=True)
 
-    # 6. Add Deep Ambient Tense Score
-    bgm_path = os.path.join(work_dir, "hidden_why_bgm.wav")
-    print("🎵 Mastering Deep Ambient Tension Soundtrack...")
-    create_hidden_why_soundtrack(total_duration + 2.0, bgm_path)
+    # 4. Add Ambient Soundtrack
+    bgm_path = os.path.join(work_dir, "ambient_bgm.wav")
+    create_suspense_soundtrack(total_audio_dur + 2.0, bgm_path)
 
+    # 5. Final Audio & Video Merge
     final_output = os.path.join(work_dir, "final_video.mp4")
     cmd_master = [
         "ffmpeg", "-y",
         "-i", video_only,
+        "-i", voice_file,
         "-i", bgm_path,
         "-filter_complex",
-        "[0:a]volume=1.0[voice];[1:a]volume=0.20[bgm];[voice][bgm]amix=inputs=2:duration=first[aout]",
+        "[1:a]volume=1.0[voice];[2:a]volume=0.18[bgm];[voice][bgm]amix=inputs=2:duration=first[aout]",
         "-map", "0:v",
         "-map", "[aout]",
         "-c:v", "copy",
@@ -252,10 +276,10 @@ def build_hidden_why_video():
     ]
     subprocess.run(cmd_master, check=True)
 
-    mb = os.path.getsize(final_output) / (1024 * 1024)
+    size_mb = os.path.getsize(final_output) / (1024 * 1024)
     print("=" * 65)
-    print(f"🎉 @HIDDENWHY STYLE VIDEO READY: {final_output} ({mb:.2f} MB)")
+    print(f"🎉 FAST-PACED DOCUMENTARY READY: {final_output} ({size_mb:.2f} MB)")
     print("=" * 65)
 
 if __name__ == "__main__":
-    build_hidden_why_video()
+    build_fast_paced_documentary()
