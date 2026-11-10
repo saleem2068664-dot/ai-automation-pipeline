@@ -1,1 +1,4 @@
-cohere
+opencv-python
+numpy
+edge-tts
+requests
