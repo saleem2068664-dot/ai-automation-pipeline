@@ -7,67 +7,58 @@ import asyncio
 import edge_tts
 
 # -------------------------------------------------------------
-# 1. THE ANCIENT STICKMAN SCRIPT
+# 1. MASTER DNA-1 NOIR STICKMAN STORYBOARD (SCENE-BY-SCENE SYNC)
 # -------------------------------------------------------------
-DOC_SCRIPT = (
-    "تصور کریں، اگر اسٹیک مین بیس ہزار سال پہلے قدیم دنیا میں جاگتا! "
-    "یہ پتھر کا دور تھا، جہاں اسٹیک مین نے پہلی بار پتھر رگڑ کر آگ جلائی! "
-    "پھر اس کا سامنا ایک دیوہیکل میمتھ سے ہوا، اور اسٹیک مین بھالا لے کر شکار پر نکلا! "
-    "وقت بدلا اور اسٹیک مین نے مصر کے صحرا میں عظیم اہرام تعمیر کیے! "
-    "اور پھر رومن میدان میں تلوار اور ڈھال لے کر بہادری سے لڑا! "
-    "قدیم اسٹیک مین کی یہ کہانی بتاتی ہے کہ انسان نے کیسے تاریخ رقم کی!"
-)
+# BGR Color Palette Locked to Master Prompt DNA-1:
+C_VOID       = (0, 0, 0)         # #000000 Pitch Black Void
+C_BODY_NEAR  = (231, 228, 228)   # #E4E4E7 Matte Near-Limb
+C_BODY_FAR   = (122, 113, 113)   # #71717A Depth Far-Limb
+C_OUTLINE    = (91, 82, 82)      # #52525B Silhouette Rim
+C_FLOOR      = (42, 39, 39)      # #27272A Floor Horizon
+C_WHITE      = (255, 255, 255)   # #FFFFFF Glowing Eyes / Core
+C_GOLD       = (11, 158, 245)    # #F59E0B Selective Gold Accent
+C_CRIMSON    = (68, 68, 239)     # #EF4444 Selective Crimson Wall
+C_CYAN       = (212, 182, 6)     # #06B6D4 Selective Cyan Droplets
+C_PORTAL     = (129, 185, 16)    # #10B981 Emerald Portal
 
 VOICE_NAME = "ur-PK-AsadNeural"
 
-SCENES_DATA = [
+NOIR_SCENES = [
     {
-        "id": "caveman",
-        "title": "THE STONE AGE AWAKENING",
-        "sub": "20,000 SAAL PEHLE STICKMAN JAAGA",
-        "mode": "zoom_in"
+        "id": "scene1_spotlight",
+        "title": "THE SILENT TRAP",
+        "voice": "زیادہ تر لوگ ناکامی سے نہیں... بلکہ ایک ان دیکھے خوف سے ہار جاتے ہیں۔"
     },
     {
-        "id": "fire",
-        "title": "DISCOVERING THE SACRED FIRE",
-        "sub": "STICKMAN NE PEHLI BAAR AAG JALAYI",
-        "mode": "zoom_out"
+        "id": "scene2_crimson_wall",
+        "title": "THE WALL OF FEAR",
+        "voice": "جب بھی آپ آگے بڑھنے کی کوشش کرتے ہیں، تو خوف کی ایک سرخ دیوار آپ کا راستہ روک لیتی ہے۔"
     },
     {
-        "id": "mammoth",
-        "title": "HUNTING THE GIANT MAMMOTH",
-        "sub": "BHALA LIYE SHIKAR PAR NIKLA",
-        "mode": "zoom_in"
+        "id": "scene3_overthinking",
+        "title": "WEIGHT OF DOUBT",
+        "voice": "شک اور مایوسی کی بارش انسان کو اندر سے توڑ دیتی ہے، اور قدم رک جاتے ہیں۔"
     },
     {
-        "id": "egypt",
-        "title": "ANCIENT EGYPT & PYRAMIDS",
-        "sub": "SAHRA MAIN AZEEM AHRAAM KI TAAMEER",
-        "mode": "zoom_out"
+        "id": "scene4_portal_leap",
+        "title": "CHOOSE COURAGE",
+        "voice": "لیکن جس لمحے آپ ہمت کر کے ایک قدم آگے بڑھاتے ہیں، کامیابی کا دروازہ خود کھل جاتا ہے!"
     },
     {
-        "id": "gladiator",
-        "title": "ROMAN GLADIATOR ARENA",
-        "sub": "TALWAR AUR DHAAL SE JANG",
-        "mode": "zoom_in"
-    },
-    {
-        "id": "victory",
-        "title": "A LEGENDARY HISTORY",
-        "sub": "INSAAN NE TAAREEKH RAKAM KI",
-        "mode": "zoom_out"
+        "id": "scene5_gold_victory",
+        "title": "BEYOND THE SHADOW",
+        "voice": "کیونکہ آپ کی اصل طاقت اس خوف کے بالکل پار چھپی ہوتی ہے!"
     }
 ]
 
 # -------------------------------------------------------------
-# 2. AUDIO & EPIC SOUNDTRACK GENERATOR
+# 2. AUDIO & FOLEY SFX SYNTHESIS
 # -------------------------------------------------------------
-async def record_full_voice(text: str, out_path: str):
-    print("🎙️ Recording Ancient Stickman Epic Urdu Narration...")
-    comm = edge_tts.Communicate(text, VOICE_NAME, rate="-2%", pitch="-1Hz")
+async def record_voice(text: str, out_path: str):
+    comm = edge_tts.Communicate(text, VOICE_NAME, rate="-3%", pitch="-2Hz")
     await comm.save(out_path)
 
-def get_audio_duration(file_path: str) -> float:
+def get_duration(file_path: str) -> float:
     cmd = [
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1", file_path
@@ -75,404 +66,346 @@ def get_audio_duration(file_path: str) -> float:
     try:
         return float(subprocess.check_output(cmd).strip())
     except Exception:
-        return 40.0
+        return 5.0
 
-def build_ancient_soundtrack(duration_sec: float, cut_timestamps: list, dest_path: str):
-    sample_rate = 44100
-    t = np.linspace(0, duration_sec, int(sample_rate * duration_sec), endpoint=False)
-    
-    # Ancient epic war drum beats (Every 1.2 seconds)
-    drums = np.zeros_like(t)
-    for beat_t in np.arange(0.2, duration_sec, 1.2):
-        mask = (t >= beat_t) & (t < beat_t + 0.35)
-        dt = t[mask] - beat_t
-        drums[mask] += 0.35 * np.sin(2 * np.pi * 65.0 * dt) * np.exp(-dt * 12.0)
+def build_noir_soundtrack(total_dur: float, scene_starts: list, dest_path: str):
+    """Deep noir sub-bass hum + Whoosh transitions + Impact & Chime cues"""
+    sr = 44100
+    t = np.linspace(0, total_dur, int(sr * total_dur), endpoint=False)
 
-    # Low atmospheric drone
-    drone = 0.15 * np.sin(2 * np.pi * 110.0 * t) + 0.10 * np.sin(2 * np.pi * 164.8 * t)
-    total_audio = drums + drone
+    # Low cinematic ambient noir drone
+    drone = (
+        0.24 * np.sin(2 * np.pi * 55.0 * t) +
+        0.16 * np.sin(2 * np.pi * 82.4 * t) +
+        0.10 * np.sin(2 * np.pi * 110.0 * t)
+    ) * (0.75 + 0.25 * np.sin(2 * np.pi * 0.1 * t))
 
-    # Whoosh SFX on each cut
-    whoosh_dur = 0.40
-    w_len = int(sample_rate * whoosh_dur)
-    w_t = np.linspace(0, whoosh_dur, w_len, endpoint=False)
-    bell = (np.sin(np.pi * (w_t / whoosh_dur))) ** 2
-    noise = np.random.uniform(-0.35, 0.35, size=w_len)
-    sweep = np.sin(2 * np.pi * (260 - 160 * (w_t / whoosh_dur)) * w_t)
-    whoosh_sfx = (noise * 0.65 + sweep * 0.35) * bell * 0.55
+    audio = drone.copy()
 
-    for cut_t in cut_timestamps:
-        start_idx = int((cut_t - 0.10) * sample_rate)
-        end_idx = start_idx + w_len
-        if start_idx >= 0 and end_idx < len(total_audio):
-            total_audio[start_idx:end_idx] += whoosh_sfx
+    # Whoosh at every scene transition
+    w_dur = 0.38
+    w_len = int(sr * w_dur)
+    w_t = np.linspace(0, w_dur, w_len, endpoint=False)
+    bell = np.sin(np.pi * (w_t / w_dur)) ** 2
+    np.random.seed(7)
+    whoosh = (np.random.uniform(-0.3, 0.3, w_len) * 0.65 + np.sin(2 * np.pi * (240 - 140 * (w_t / w_dur)) * w_t) * 0.35) * bell * 0.45
 
-    total_audio = total_audio / (np.max(np.abs(total_audio)) + 1e-6) * 0.28
-    pcm = (total_audio * 32767).astype(np.int16)
-    
-    raw_path = dest_path + ".raw"
-    pcm.tofile(raw_path)
+    for st in scene_starts[1:]:
+        idx = int(max(0, st - 0.1) * sr)
+        if idx + w_len < len(audio):
+            audio[idx:idx + w_len] += whoosh
+
+    # Resonant Golden Chime on Scene 4 & 5
+    for ct in [scene_starts[3] + 0.6, scene_starts[4] + 0.2]:
+        c_dur = 1.4
+        c_len = int(sr * c_dur)
+        c_t = np.linspace(0, c_dur, c_len, endpoint=False)
+        chime = (0.3 * np.sin(2 * np.pi * 523.25 * c_t) + 0.15 * np.sin(2 * np.pi * 1046.5 * c_t)) * np.exp(-c_t * 2.8)
+        idx = int(ct * sr)
+        if idx + c_len < len(audio):
+            audio[idx:idx + c_len] += chime
+
+    audio = audio / (np.max(np.abs(audio)) + 1e-6) * 0.28
+    pcm = (audio * 32767).astype(np.int16)
+    raw = dest_path + ".raw"
+    pcm.tofile(raw)
     subprocess.run([
         "ffmpeg", "-y", "-f", "s16le", "-ar", "44100", "-ac", "1",
-        "-i", raw_path, dest_path
+        "-i", raw, dest_path
     ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # -------------------------------------------------------------
-# 3. PROCEDURAL ANCIENT STICKMAN DRAWING FUNCTIONS
+# 3. DNA-1 NOIR STAGE & STICKMAN RIG RENDERER
 # -------------------------------------------------------------
-def get_ancient_papyrus_bg():
-    """Generates a warm, authentic ancient papyrus parchment background"""
-    bg = np.full((1080, 1920, 3), (210, 230, 245), dtype=np.uint8)  # Warm parchment cream
-    # Subtle stone texture vignette
-    grad = np.linspace(0, 1, 1080)[:, None]
-    bg[:, :, 0] = np.clip(bg[:, :, 0] - grad * 35, 0, 255).astype(np.uint8)
-    bg[:, :, 1] = np.clip(bg[:, :, 1] - grad * 30, 0, 255).astype(np.uint8)
-    bg[:, :, 2] = np.clip(bg[:, :, 2] - grad * 20, 0, 255).astype(np.uint8)
-    return bg
+def draw_spotlight_stage(frame, spot_x, floor_y, beam_color=C_WHITE, beam_opacity=0.11, pool_rx=95):
+    h, w = frame.shape[:2]
+    overlay = frame.copy()
 
-def draw_stickman_base(canvas, x, y, scale=1.0, pose="stand"):
-    black = (20, 20, 20)
-    th = max(4, int(5 * scale))
-    hr = int(28 * scale)
-    head_c = (int(x), int(y - 85 * scale))
+    # 25-degree conical overhead spotlight beam
+    beam_pts = np.array([
+        [int(spot_x - 35), 0],
+        [int(spot_x + 35), 0],
+        [int(spot_x + pool_rx * 1.4), floor_y],
+        [int(spot_x - pool_rx * 1.4), floor_y]
+    ], dtype=np.int32)
+    cv2.fillPoly(overlay, [beam_pts], beam_color)
+    cv2.addWeighted(overlay, beam_opacity, frame, 1.0 - beam_opacity, 0, frame)
 
-    # Head
-    cv2.circle(canvas, head_c, hr, black, -1)
-    # Expressive White Eyes
-    cv2.circle(canvas, (head_c[0] + int(6 * scale), head_c[1] - int(4 * scale)), int(4 * scale), (255, 255, 255), -1)
-    cv2.circle(canvas, (head_c[0] + int(16 * scale), head_c[1] - int(4 * scale)), int(4 * scale), (255, 255, 255), -1)
+    # Radial ground light pool (60x18 ratio scaled for 720p)
+    pool_overlay = frame.copy()
+    cv2.ellipse(pool_overlay, (int(spot_x), floor_y), (pool_rx, 16), 0, 0, 360, beam_color, -1)
+    cv2.addWeighted(pool_overlay, 0.25, frame, 0.75, 0, frame)
+    cv2.ellipse(frame, (int(spot_x), floor_y), (int(pool_rx * 0.55), 8), 0, 0, 360, beam_color, -1)
 
-    # Spine
-    neck = (int(x), int(head_c[1] + hr))
-    hip = (int(x), int(y))
-    cv2.line(canvas, neck, hip, black, th)
+    # Razor-thin 1.5px horizon floor line (#27272A) at Y=74%
+    cv2.line(frame, (0, floor_y), (w, floor_y), C_FLOOR, 2)
 
-    if pose == "stand":
-        # Straight legs
-        cv2.line(canvas, hip, (int(x - 20 * scale), int(y + 65 * scale)), black, th)
-        cv2.line(canvas, hip, (int(x + 20 * scale), int(y + 65 * scale)), black, th)
-        # Arms
-        arm_y = int(neck[1] + 20 * scale)
-        cv2.line(canvas, (int(x), arm_y), (int(x - 30 * scale), int(arm_y + 40 * scale)), black, th)
-        cv2.line(canvas, (int(x), arm_y), (int(x + 30 * scale), int(arm_y + 40 * scale)), black, th)
+def draw_noir_stickman(frame, x, y, scale=1.0, walk_phase=0.0, crouch=0.0, bow_deg=0.0,
+                       arm_raise=0.0, silhouette=False, eye_scale=1.0, alpha=1.0):
+    """Draws the exact DNA-1 Stickman with near/far limb depth & glowing oval eyes"""
+    target = frame if alpha >= 0.99 else frame.copy()
+    th = max(4, int(6 * scale))
+    near_col = C_VOID if silhouette else C_BODY_NEAR
+    far_col  = C_VOID if silhouette else C_BODY_FAR
 
-    elif pose == "run":
-        # Dynamic running legs
-        cv2.line(canvas, hip, (int(x - 45 * scale), int(y + 45 * scale)), black, th)
-        cv2.line(canvas, hip, (int(x + 45 * scale), int(y + 60 * scale)), black, th)
-        # Dynamic running arms
-        arm_y = int(neck[1] + 20 * scale)
-        cv2.line(canvas, (int(x), arm_y), (int(x - 40 * scale), int(arm_y + 35 * scale)), black, th)
-        cv2.line(canvas, (int(x), arm_y), (int(x + 55 * scale), int(arm_y - 20 * scale)), black, th)
+    crouch_px = int(28 * scale * crouch)
+    bow_rad = math.radians(bow_deg)
 
-    elif pose == "strike_fire":
-        cv2.line(canvas, hip, (int(x - 25 * scale), int(y + 65 * scale)), black, th)
-        cv2.line(canvas, hip, (int(x + 25 * scale), int(y + 65 * scale)), black, th)
-        arm_y = int(neck[1] + 20 * scale)
-        # Both hands forward striking stones
-        cv2.line(canvas, (int(x), arm_y), (int(x + 35 * scale), int(arm_y + 25 * scale)), black, th)
-        cv2.line(canvas, (int(x), arm_y), (int(x + 20 * scale), int(arm_y + 30 * scale)), black, th)
+    hip = (int(x), int(y - 72 * scale + crouch_px))
+    torso_len = 66 * scale
+    neck = (
+        int(hip[0] + math.sin(bow_rad) * torso_len),
+        int(hip[1] - math.cos(bow_rad) * torso_len)
+    )
+    head_r = int(23 * scale)
+    head_c = (
+        int(neck[0] + math.sin(bow_rad) * (head_r + 4)),
+        int(neck[1] - math.cos(bow_rad) * (head_r + 4))
+    )
 
-    elif pose == "pharaoh":
-        cv2.line(canvas, hip, (int(x - 20 * scale), int(y + 65 * scale)), black, th)
-        cv2.line(canvas, hip, (int(x + 20 * scale), int(y + 65 * scale)), black, th)
-        arm_y = int(neck[1] + 20 * scale)
-        # Royal arms holding scepter
-        cv2.line(canvas, (int(x), arm_y), (int(x - 35 * scale), int(arm_y + 15 * scale)), black, th)
-        cv2.line(canvas, (int(x), arm_y), (int(x + 45 * scale), int(arm_y - 30 * scale)), black, th)
+    # Walking stride math
+    stride = math.sin(walk_phase) * 34 * scale
+    lift1 = max(0.0, math.cos(walk_phase)) * 14 * scale
+    lift2 = max(0.0, -math.cos(walk_phase)) * 14 * scale
 
-    elif pose == "gladiator":
-        # Battle stance legs
-        cv2.line(canvas, hip, (int(x - 35 * scale), int(y + 65 * scale)), black, th)
-        cv2.line(canvas, hip, (int(x + 35 * scale), int(y + 65 * scale)), black, th)
-        arm_y = int(neck[1] + 20 * scale)
-        # Left arm holding shield
-        cv2.line(canvas, (int(x), arm_y), (int(x - 45 * scale), int(arm_y + 10 * scale)), black, th)
-        # Right arm raising sword
-        cv2.line(canvas, (int(x), arm_y), (int(x + 50 * scale), int(arm_y - 40 * scale)), black, th)
+    foot_far  = (int(x - stride), int(y - lift2))
+    foot_near = (int(x + stride), int(y - lift1))
 
-    elif pose == "victory":
-        cv2.line(canvas, hip, (int(x - 25 * scale), int(y + 65 * scale)), black, th)
-        cv2.line(canvas, hip, (int(x + 25 * scale), int(y + 65 * scale)), black, th)
-        arm_y = int(neck[1] + 20 * scale)
-        # Both hands V in the air!
-        cv2.line(canvas, (int(x), arm_y), (int(x - 45 * scale), int(arm_y - 50 * scale)), black, th)
-        cv2.line(canvas, (int(x), arm_y), (int(x + 45 * scale), int(arm_y - 50 * scale)), black, th)
+    knee_far  = (int((hip[0] + foot_far[0]) / 2 + 8 * crouch), int((hip[1] + foot_far[1]) / 2 - 6 * crouch))
+    knee_near = (int((hip[0] + foot_near[0]) / 2 + 12 * crouch), int((hip[1] + foot_near[1]) / 2 - 6 * crouch))
 
-    return head_c
+    # Far arm & far leg (#71717A depth)
+    sh = (int(neck[0] - math.sin(bow_rad) * 8), int(neck[1] + 10 * scale))
+    hand_far = (
+        int(sh[0] + math.sin(walk_phase) * 26 * scale + arm_raise * 20),
+        int(sh[1] + 46 * scale - arm_raise * 70 * scale)
+    )
+    hand_near = (
+        int(sh[0] - math.sin(walk_phase) * 26 * scale + arm_raise * 35),
+        int(sh[1] + 46 * scale - arm_raise * 85 * scale)
+    )
 
-# -------------------------------------------------------------
-# 4. DRAW 6 INDIVIDUAL 100% SCRIPT-ACCURATE ANCIENT SCENES
-# -------------------------------------------------------------
-def generate_ancient_scene_image(scene_id: str, dest_path: str):
-    canvas = get_ancient_papyrus_bg()
-    ground_y = 780
-    cv2.line(canvas, (0, ground_y), (1920, ground_y), (40, 30, 25), 4)
+    if silhouette:
+        # 1px outline rim (#52525B)
+        for p1, p2 in [(hip, knee_far), (knee_far, foot_far), (hip, neck), (sh, hand_far),
+                       (hip, knee_near), (knee_near, foot_near), (sh, hand_near)]:
+            cv2.line(target, p1, p2, C_OUTLINE, th + 3, cv2.LINE_AA)
+        cv2.circle(target, head_c, head_r + 2, C_OUTLINE, -1, cv2.LINE_AA)
 
-    # --- SCENE 1: CAVEMAN IN STONE AGE ---
-    if scene_id == "caveman":
-        # Cave Wall Paintings of Deer & Handprints
-        cv2.putText(canvas, "(~~~)  <<-o->>", (200, 350), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 2.0, (70, 50, 45), 4)
-        cv2.putText(canvas, "PREHISTORIC CAVE 20,000 BC", (200, 220), cv2.FONT_HERSHEY_DUPLEX, 1.1, (90, 60, 50), 2)
-        # Stone Axe / Club on the ground
-        cv2.line(canvas, (1150, ground_y - 20), (1220, ground_y - 20), (30, 60, 100), 8)
-        cv2.circle(canvas, (1150, ground_y - 20), 25, (80, 80, 80), -1)
-        # Stickman waking up
-        draw_stickman_base(canvas, 960, ground_y - 65, scale=1.4, pose="stand")
+    # Far limbs
+    cv2.line(target, hip, knee_far, far_col, th, cv2.LINE_AA)
+    cv2.line(target, knee_far, foot_far, far_col, th, cv2.LINE_AA)
+    cv2.line(target, sh, hand_far, far_col, th - 1, cv2.LINE_AA)
 
-    # --- SCENE 2: DISCOVERING FIRE ---
-    elif scene_id == "fire":
-        # Roaring Campfire
-        fx, fy = 1150, ground_y - 20
-        # Fire flames
-        pts_flame = np.array([[fx - 50, fy], [fx, fy - 140], [fx + 50, fy]], dtype=np.int32)
-        cv2.fillPoly(canvas, [pts_flame], (0, 140, 255))
-        pts_flame_in = np.array([[fx - 25, fy], [fx, fy - 90], [fx + 25, fy]], dtype=np.int32)
-        cv2.fillPoly(canvas, [pts_flame_in], (0, 230, 255))
-        # Firewood logs
-        cv2.line(canvas, (fx - 60, fy), (fx + 60, fy - 15), (20, 50, 110), 10)
-        cv2.line(canvas, (fx - 50, fy - 15), (fx + 50, fy), (20, 50, 110), 10)
-        # Stickman holding flint stone
-        draw_stickman_base(canvas, 800, ground_y - 65, scale=1.4, pose="strike_fire")
-        cv2.circle(canvas, (870, ground_y - 120), 14, (70, 70, 70), -1)  # Flint rock
-        cv2.putText(canvas, "SPARKS!", (860, ground_y - 150), cv2.FONT_HERSHEY_DUPLEX, 1.0, (0, 120, 255), 2)
+    # Torso + Head
+    cv2.line(target, hip, neck, near_col, th + 1, cv2.LINE_AA)
+    cv2.circle(target, head_c, head_r, near_col, -1, cv2.LINE_AA)
 
-    # --- SCENE 3: HUNTING THE GIANT MAMMOTH ---
-    elif scene_id == "mammoth":
-        # Giant Woolly Mammoth
-        mx, my = 1350, ground_y - 120
-        # Mammoth Body
-        cv2.ellipse(canvas, (mx, my), (160, 120), 0, 0, 360, (30, 55, 90), -1)
-        cv2.circle(canvas, (mx - 140, my - 20), 75, (25, 45, 80), -1)  # Head
-        cv2.circle(canvas, (mx - 165, my - 35), 8, (255, 255, 255), -1) # Eye
-        # Giant Curved Tusks
-        cv2.ellipse(canvas, (mx - 210, my + 10), (70, 45), -35, 0, 180, (230, 240, 255), 14)
-        # Trunk
-        cv2.ellipse(canvas, (mx - 180, my + 45), (35, 65), 20, 0, 180, (25, 45, 80), 16)
-        # Mammoth Legs
-        for lx in [mx - 110, mx - 40, mx + 40, mx + 110]:
-            cv2.line(canvas, (lx, my + 60), (lx, ground_y), (20, 40, 70), 22)
-        
-        # Stickman Chasing with Spear!
-        draw_stickman_base(canvas, 450, ground_y - 65, scale=1.4, pose="run")
-        # Long Stone Spear in Hand
-        cv2.line(canvas, (430, ground_y - 120), (660, ground_y - 200), (30, 70, 130), 6)
-        # Flint Spearhead
-        pts_spear = np.array([[660, ground_y - 200], [690, ground_y - 212], [665, ground_y - 188]], dtype=np.int32)
-        cv2.fillPoly(canvas, [pts_spear], (60, 60, 60))
-        cv2.putText(canvas, "CHARGE!!", (460, ground_y - 240), cv2.FONT_HERSHEY_DUPLEX, 1.4, (0, 0, 220), 3)
+    # Near limbs
+    cv2.line(target, hip, knee_near, near_col, th, cv2.LINE_AA)
+    cv2.line(target, knee_near, foot_near, near_col, th, cv2.LINE_AA)
+    cv2.line(target, sh, hand_near, near_col, th - 1, cv2.LINE_AA)
 
-    # --- SCENE 4: ANCIENT EGYPT & PYRAMIDS ---
-    elif scene_id == "egypt":
-        # Giant Egyptian Pyramids in Background
-        p1 = np.array([[1050, ground_y], [1350, 280], [1650, ground_y]], dtype=np.int32)
-        cv2.fillPoly(canvas, [p1], (110, 180, 230))  # Golden Pyramid 1
-        p2 = np.array([[750, ground_y], [980, 380], [1210, ground_y]], dtype=np.int32)
-        cv2.fillPoly(canvas, [p2], (85, 150, 205))   # Golden Pyramid 2
-        # Blazing Desert Sun
-        cv2.circle(canvas, (1650, 220), 75, (0, 200, 255), -1)
+    # Two glowing #FFFFFF oval eyes
+    eye_col = C_VOID if not silhouette else C_WHITE
+    eye_h = max(2, int(6 * scale * eye_scale))
+    eye_w = max(2, int(4 * scale))
+    cv2.ellipse(target, (head_c[0] + int(5 * scale), head_c[1] - int(3 * scale)), (eye_w, eye_h), 0, 0, 360, eye_col, -1)
+    cv2.ellipse(target, (head_c[0] + int(14 * scale), head_c[1] - int(3 * scale)), (eye_w, eye_h), 0, 0, 360, eye_col, -1)
 
-        # Stickman Pharaoh!
-        hc = draw_stickman_base(canvas, 550, ground_y - 65, scale=1.4, pose="pharaoh")
-        # Golden Pharaoh Nemes Crown on Head
-        pts_crown = np.array([[hc[0] - 40, hc[1] - 15], [hc[0], hc[1] - 65], [hc[0] + 40, hc[1] - 15]], dtype=np.int32)
-        cv2.fillPoly(canvas, [pts_crown], (0, 215, 255))
-        # Royal Golden Scepter
-        cv2.line(canvas, (595, ground_y - 200), (595, ground_y - 60), (0, 200, 255), 8)
-        cv2.circle(canvas, (595, ground_y - 200), 16, (0, 0, 255), -1)
+    if alpha < 0.99:
+        cv2.addWeighted(target, alpha, frame, 1.0 - alpha, 0, frame)
 
-    # --- SCENE 5: ROMAN GLADIATOR ARENA ---
-    elif scene_id == "gladiator":
-        # Colosseum Arches in background
-        for ax in range(250, 1800, 240):
-            cv2.ellipse(canvas, (ax, ground_y - 200), (90, 180), 0, 180, 360, (130, 140, 150), 8)
-            cv2.line(canvas, (ax - 90, ground_y - 200), (ax - 90, ground_y), (130, 140, 150), 8)
-            cv2.line(canvas, (ax + 90, ground_y - 200), (ax + 90, ground_y), (130, 140, 150), 8)
+def draw_floor_reflection(frame, x, floor_y):
+    """14% subtle vertical reflection under the character on the dark floor"""
+    refl = frame.copy()
+    cv2.ellipse(refl, (int(x), floor_y + 24), (16, 22), 0, 0, 360, C_BODY_FAR, -1)
+    cv2.addWeighted(refl, 0.14, frame, 0.86, 0, frame)
 
-        # Stickman Gladiator
-        hc = draw_stickman_base(canvas, 960, ground_y - 65, scale=1.5, pose="gladiator")
-        # Roman Helmet with Red Feather Crest!
-        cv2.ellipse(canvas, (hc[0], hc[1] - 30), (32, 18), 0, 180, 360, (0, 0, 220), -1)  # Red crest
-        # Golden Round Shield in Left Hand
-        cv2.circle(canvas, (890, ground_y - 120), 48, (0, 215, 255), -1)
-        cv2.circle(canvas, (890, ground_y - 120), 48, (0, 0, 0), 4)
-        cv2.circle(canvas, (890, ground_y - 120), 15, (0, 0, 200), -1)
-        # Shiny Iron Sword in Right Hand!
-        cv2.line(canvas, (1020, ground_y - 160), (1090, ground_y - 260), (220, 220, 220), 8)
-        cv2.line(canvas, (1005, ground_y - 170), (1035, ground_y - 150), (0, 200, 255), 8) # Sword guard
-        cv2.putText(canvas, "VICTORY OR DEATH!", (760, ground_y - 320), cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 200), 3)
-
-    # --- SCENE 6: VICTORY & LEGEND OF HISTORY ---
-    else:
-        # Starry sky sparkles
-        np.random.seed(88)
-        for _ in range(50):
-            sx, sy = np.random.randint(0, 1920), np.random.randint(50, 600)
-            cv2.circle(canvas, (sx, sy), np.random.randint(2, 5), (0, 180, 255), -1)
-        
-        # Stickman Victorious Hero!
-        draw_stickman_base(canvas, 960, ground_y - 65, scale=1.5, pose="victory")
-        # Golden Crown on Head
-        pts_win_crown = np.array([[925, ground_y - 220], [940, ground_y - 250], [960, ground_y - 230], [980, ground_y - 250], [995, ground_y - 220]], dtype=np.int32)
-        cv2.fillPoly(canvas, [pts_win_crown], (0, 215, 255))
-        cv2.putText(canvas, "HISTORY IS MADE!", (750, ground_y - 310), cv2.FONT_HERSHEY_DUPLEX, 1.5, (0, 130, 255), 4)
-
-    cv2.imwrite(dest_path, canvas, [cv2.IMWRITE_JPEG_QUALITY, 96])
+def draw_upper_title(frame, title, y_pos=140):
+    """Upper-third tracked bold title (Y=16%-32%)"""
+    font = cv2.FONT_HERSHEY_DUPLEX
+    size = cv2.getTextSize(title, font, 1.45, 3)[0]
+    tx = (frame.shape[1] - size[0]) // 2
+    cv2.putText(frame, title, (tx + 3, y_pos + 3), font, 1.45, (20, 20, 20), 4, cv2.LINE_AA)
+    cv2.putText(frame, title, (tx, y_pos), font, 1.45, C_WHITE, 3, cv2.LINE_AA)
 
 # -------------------------------------------------------------
-# 5. CINEMATIC RENDERER WITH PARTICLES & BIG IMPACT TEXT
+# 4. FRAME-BY-FRAME ANIMATED SCENES (100% DNA-1 LOCKED)
 # -------------------------------------------------------------
-def render_ancient_motion_clip(img_path: str, title: str, sub: str, mode: str, duration: float, out_path: str, seed: int):
-    img = cv2.imread(img_path)
-    h, w = img.shape[:2]
-
-    # Pre-render Big Bold Letterbox & Signature Typography
-    overlay = img.copy()
-    cv2.rectangle(overlay, (0, 880), (1920, 1080), (0, 0, 0), -1)  # Bottom banner
-    cv2.rectangle(overlay, (0, 0), (1920, 75), (0, 0, 0), -1)       # Top letterbox
-    cv2.addWeighted(overlay, 0.72, img, 0.28, 0, img)
-
-    # Signature Ancient Gold Accent Bar
-    cv2.rectangle(img, (75, 905), (82, 1045), (0, 190, 255), -1)
-
-    # Big Bold Impact Captions
-    cv2.putText(img, title, (108, 955), cv2.FONT_HERSHEY_DUPLEX, 1.35, (0, 0, 0), 5, cv2.LINE_AA)
-    cv2.putText(img, title, (105, 952), cv2.FONT_HERSHEY_DUPLEX, 1.35, (255, 255, 255), 2, cv2.LINE_AA)
-    cv2.putText(img, sub, (108, 1018), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (0, 0, 0), 4, cv2.LINE_AA)
-    cv2.putText(img, sub, (105, 1015), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (0, 220, 255), 2, cv2.LINE_AA)
-
-    fps = 30
+def render_noir_scene(scene_id: str, title: str, duration: float, out_path: str):
+    w, h, fps = 1280, 720, 30
+    floor_y = int(h * 0.74)  # Y=74% locked horizon
     total_frames = max(1, int(duration * fps))
 
-    # Floating Ancient Embers & Stardust Particles
-    np.random.seed(seed)
-    num_particles = 40
-    particles = []
-    for _ in range(num_particles):
-        particles.append({
-            "x": np.random.uniform(0, 1920),
-            "y": np.random.uniform(0, 1080),
-            "speed_y": np.random.uniform(1.2, 3.2),
-            "speed_x": np.random.uniform(-1.0, 1.0),
-            "radius": np.random.uniform(2, 5)
-        })
-
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    vw = cv2.VideoWriter(out_path, fourcc, fps, (1920, 1080))
+    vw = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
+    np.random.seed(42)
+    droplets = [{"x": np.random.randint(150, w - 150), "y": np.random.randint(0, floor_y), "sp": np.random.uniform(7, 11)} for _ in range(40)]
 
     for f in range(total_frames):
+        t = f / fps
         p = f / max(1, total_frames - 1)
-        
-        # Smooth Zoom In or Zoom Out (Sub-pixel linear)
-        if mode == "zoom_in":
-            zoom = 1.0 + 0.10 * p
+        frame = np.zeros((h, w, 3), dtype=np.uint8)  # Pure #000000 void
+
+        # --- SCENE 1: THE SILENT TRAP (Spotlight, blinking, golden spark) ---
+        if scene_id == "scene1_spotlight":
+            sx = int(w * 0.5)
+            draw_spotlight_stage(frame, sx, floor_y, C_WHITE, 0.12)
+            draw_floor_reflection(frame, sx, floor_y)
+            blink = 0.15 if (f % 75) < 4 else 1.0
+            # Golden spark orbiting softly
+            gx = int(sx + 95 * math.cos(t * 2.2))
+            gy = int(floor_y - 110 + 18 * math.sin(t * 3.0))
+            cv2.circle(frame, (gx, gy), 14, (5, 70, 110), -1)
+            cv2.circle(frame, (gx, gy), 6, C_GOLD, -1)
+            draw_noir_stickman(frame, sx, floor_y, scale=1.15, bow_deg=3 * math.sin(t * 2), eye_scale=blink)
+            draw_upper_title(frame, title, y_pos=155)
+
+        # --- SCENE 2: WALL OF FEAR (Walk + Crimson Barrier + Recoil) ---
+        elif scene_id == "scene2_crimson_wall":
+            wall_x = int(w * 0.62)
+            sx = int(w * 0.25 + min(1.0, p * 1.4) * (wall_x - w * 0.25 - 65))
+            draw_spotlight_stage(frame, sx, floor_y, C_WHITE, 0.10)
+            draw_floor_reflection(frame, sx, floor_y)
+
+            # Glowing Crimson Barrier Wall (#EF4444)
+            glow = frame.copy()
+            cv2.rectangle(glow, (wall_x - 16, 160), (wall_x + 16, floor_y), C_CRIMSON, -1)
+            cv2.addWeighted(glow, 0.35, frame, 0.65, 0, frame)
+            cv2.rectangle(frame, (wall_x - 4, 160), (wall_x + 4, floor_y), C_CRIMSON, -1)
+
+            walking = p < 0.7
+            phase = t * 11.0 if walking else 0.0
+            crouch = 0.55 if not walking else 0.0
+            draw_noir_stickman(frame, sx, floor_y, scale=1.15, walk_phase=phase, crouch=crouch, arm_raise=0.3 if not walking else 0.0)
+            draw_upper_title(frame, title, y_pos=155)
+
+        # --- SCENE 3: WEIGHT OF DOUBT (14 deg Forward Bow + Cyan Rain 18px) ---
+        elif scene_id == "scene3_overthinking":
+            sx = int(w * 0.45)
+            draw_spotlight_stage(frame, sx, floor_y, C_CYAN, 0.10)
+            draw_floor_reflection(frame, sx, floor_y)
+
+            # 14-degree ease-in-out forward bow
+            bow = 14.0 + 4.0 * math.sin(t * 2.5)
+            draw_noir_stickman(frame, sx, floor_y, scale=1.15, crouch=0.35, bow_deg=bow)
+
+            # Discrete Cyan Droplets (#06B6D4)
+            for d in droplets:
+                d["y"] += d["sp"]
+                if d["y"] > floor_y:
+                    d["y"] = 0
+                cv2.line(frame, (d["x"], int(d["y"])), (d["x"], int(d["y"]) + 18), C_CYAN, 2)
+
+            # Floating distant Gold Key / Spark (#F59E0B)
+            cv2.circle(frame, (int(w * 0.78), floor_y - 120), 10, C_GOLD, -1)
+            draw_upper_title(frame, title, y_pos=155)
+
+        # --- SCENE 4: CHOOSE COURAGE (6f Anticipation + 3-Ghost Trails + Emerald Portal) ---
+        elif scene_id == "scene4_portal_leap":
+            portal_x = int(w * 0.76)
+            # Glowing Emerald/Cyan Portal (#10B981)
+            p_glow = frame.copy()
+            cv2.ellipse(p_glow, (portal_x, floor_y - 110), (55, 110), 0, 0, 360, C_PORTAL, -1)
+            cv2.addWeighted(p_glow, 0.30, frame, 0.70, 0, frame)
+            cv2.ellipse(frame, (portal_x, floor_y - 110), (38, 95), 0, 0, 360, C_PORTAL, 5)
+            cv2.ellipse(frame, (portal_x, floor_y - 110), (26, 75), 0, 0, 360, C_CYAN, 2)
+
+            if p < 0.20:
+                # 6-frame deep anticipation crouch
+                sx = int(w * 0.25)
+                draw_spotlight_stage(frame, sx, floor_y, C_WHITE, 0.12)
+                draw_noir_stickman(frame, sx, floor_y, scale=1.15, crouch=0.85, bow_deg=18.0)
+            else:
+                # High-speed dash with 3-ghost trails (30%, 18%, 8%)
+                dp = min(1.0, (p - 0.20) / 0.70)
+                sx = int(w * 0.25 + dp * (portal_x - w * 0.25))
+                draw_spotlight_stage(frame, sx, floor_y, C_PORTAL, 0.12)
+                draw_floor_reflection(frame, sx, floor_y)
+
+                for g_idx, g_alpha in [(3, 0.08), (2, 0.18), (1, 0.30)]:
+                    gx = sx - g_idx * 42
+                    draw_noir_stickman(frame, gx, floor_y - 18, scale=1.15, walk_phase=t * 18 - g_idx, bow_deg=15.0, alpha=g_alpha)
+
+                draw_noir_stickman(frame, sx, floor_y - 18, scale=1.15, walk_phase=t * 18, bow_deg=15.0, arm_raise=0.5)
+
+            draw_upper_title(frame, title, y_pos=155)
+
+        # --- SCENE 5: BEYOND THE SHADOW (Silhouette Rim + Glowing Oval Eyes + Gold Rays) ---
         else:
-            zoom = 1.10 - 0.10 * p
-
-        cw = int(1920 / zoom)
-        ch = int(1080 / zoom)
-        cx = (1920 - cw) // 2
-        cy = (1080 - ch) // 2
-        
-        cropped = img[cy:cy + ch, cx:cx + cw]
-        frame = cv2.resize(cropped, (1920, 1080), interpolation=cv2.INTER_LINEAR)
-
-        # Draw Dynamic Ancient Embers Particles
-        for pt in particles:
-            pt["y"] += pt["speed_y"]
-            pt["x"] += pt["speed_x"]
-            if pt["y"] > 1080: pt["y"] = 0
-            if pt["x"] < 0: pt["x"] = 1920
-            if pt["x"] > 1920: pt["x"] = 0
-            cv2.circle(frame, (int(pt["x"]), int(pt["y"])), int(pt["radius"]), (0, 180, 255), -1)
+            sx = int(w * 0.5)
+            draw_spotlight_stage(frame, sx, floor_y, C_GOLD, 0.14, pool_rx=130)
+            draw_floor_reflection(frame, sx, floor_y)
+            # Iconic rim-lit silhouette (#000000 + 1px #52525B + 2 glowing #FFFFFF oval eyes)
+            arm_up = min(1.0, p * 2.5)
+            draw_noir_stickman(frame, sx, floor_y, scale=1.22, arm_raise=arm_up, silhouette=True, eye_scale=1.15)
+            draw_upper_title(frame, title, y_pos=155)
 
         vw.write(frame)
 
     vw.release()
 
 # -------------------------------------------------------------
-# 6. MASTER PRODUCTION PIPELINE
+# 5. MASTER PIPELINE
 # -------------------------------------------------------------
-def build_ancient_stickman_documentary():
+def build_noir_stickman_video():
     print("=" * 65)
-    print("🏹 PRODUCING 100% ANCIENT PERIOD STICKMAN DOCUMENTARY...")
+    print("🎬 RENDERING DNA-1 NOIR STICKMAN ANIMATED MASTERPIECE...")
     print("=" * 65)
 
     work_dir = "output"
     os.makedirs(work_dir, exist_ok=True)
 
-    # 1. Record Urdu Voiceover
-    voice_file = os.path.join(work_dir, "ancient_voice.mp3")
-    asyncio.run(record_full_voice(DOC_SCRIPT, voice_file))
-    total_audio_dur = get_audio_duration(voice_file)
-    print(f"🎙️ Narration Recorded: {total_audio_dur:.1f}s")
+    scene_videos = []
+    voice_files = []
+    scene_starts = []
+    cur_t = 0.0
 
-    num_scenes = len(SCENES_DATA)
-    clip_dur = total_audio_dur / num_scenes
-    print(f"⚡ Pacing: {clip_dur:.2f}s per scene (Total {num_scenes} Cuts)!")
+    for idx, sc in enumerate(NOIR_SCENES):
+        print(f"⚡ Scene {idx+1}/{len(NOIR_SCENES)}: {sc['title']}...")
+        v_path = os.path.join(work_dir, f"vo_{idx}.mp3")
+        c_path = os.path.join(work_dir, f"raw_{idx}.mp4")
+        m_path = os.path.join(work_dir, f"merged_{idx}.mp4")
 
-    # 2. Render Each Ancient Stickman Scene
-    clip_files = []
-    cut_timestamps = []
-    current_time = 0.0
+        asyncio.run(record_voice(sc["voice"], v_path))
+        dur = get_duration(v_path) + 0.6
+        scene_starts.append(cur_t)
+        cur_t += dur
 
-    for idx, sc in enumerate(SCENES_DATA):
-        print(f"🎨 Rendering Scene {idx+1}/{num_scenes} [{sc['id']}]: {sc['title']}...")
-        img_file = os.path.join(work_dir, f"scene_{idx}.jpg")
-        clip_file = os.path.join(work_dir, f"clip_{idx}.mp4")
+        render_noir_scene(sc["id"], sc["title"], dur, c_path)
 
-        generate_ancient_scene_image(sc["id"], img_file)
-        render_ancient_motion_clip(img_file, sc["title"], sc["sub"], sc["mode"], clip_dur, clip_file, seed=idx * 21)
-        clip_files.append(clip_file)
+        subprocess.run([
+            "ffmpeg", "-y", "-i", c_path, "-i", v_path,
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k", "-shortest", m_path
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-        if idx > 0:
-            cut_timestamps.append(current_time)
-        current_time += clip_dur
+        scene_videos.append(m_path)
 
-    # 3. Stitch Scenes
     concat_txt = os.path.join(work_dir, "concat.txt")
     with open(concat_txt, "w") as f:
-        for cf in clip_files:
-            f.write(f"file '{os.path.abspath(cf)}'\n")
+        for sv in scene_videos:
+            f.write(f"file '{os.path.abspath(sv)}'\n")
 
-    video_only = os.path.join(work_dir, "visuals_combined.mp4")
+    stitched = os.path.join(work_dir, "stitched_noir.mp4")
     subprocess.run([
         "ffmpeg", "-y", "-f", "concat", "-safe", "0",
-        "-i", concat_txt,
-        "-c:v", "libx264",
-        "-preset", "fast",
-        "-pix_fmt", "yuv420p",
-        video_only
+        "-i", concat_txt, "-c", "copy", stitched
+    ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    bgm_path = os.path.join(work_dir, "noir_bgm.wav")
+    build_noir_soundtrack(cur_t + 1.5, scene_starts, bgm_path)
+
+    final_video = os.path.join(work_dir, "final_video.mp4")
+    subprocess.run([
+        "ffmpeg", "-y", "-i", stitched, "-i", bgm_path,
+        "-filter_complex", "[0:a]volume=1.0[vo];[1:a]volume=0.22[bgm];[vo][bgm]amix=inputs=2:duration=first[aout]",
+        "-map", "0:v", "-map", "[aout]",
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest",
+        final_video
     ], check=True)
 
-    # 4. Generate Soundtrack with Auto-Whoosh SFX
-    bgm_path = os.path.join(work_dir, "ancient_soundtrack.wav")
-    print(f"🔊 Synthesizing Ancient War Drums + {len(cut_timestamps)} Transition WHOOSH Effects...")
-    build_ancient_soundtrack(total_audio_dur + 2.0, cut_timestamps, bgm_path)
-
-    # 5. Final Audio & Video Merge
-    final_output = os.path.join(work_dir, "final_video.mp4")
-    cmd_master = [
-        "ffmpeg", "-y",
-        "-i", video_only,
-        "-i", voice_file,
-        "-i", bgm_path,
-        "-filter_complex",
-        "[1:a]volume=1.0[voice];[2:a]volume=0.25[bgm];[voice][bgm]amix=inputs=2:duration=first[aout]",
-        "-map", "0:v",
-        "-map", "[aout]",
-        "-c:v", "copy",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        "-shortest",
-        final_output
-    ]
-    subprocess.run(cmd_master, check=True)
-
-    size_mb = os.path.getsize(final_output) / (1024 * 1024)
-    print("=" * 65)
-    print(f"🎉 100% COMPLETE ANCIENT STICKMAN VIDEO READY: {final_output} ({size_mb:.2f} MB)")
-    print("=" * 65)
+    print(f"🎉 DNA-1 NOIR STICKMAN READY: {final_video} ({os.path.getsize(final_video) // 1024} KB)")
 
 if __name__ == "__main__":
-    build_ancient_stickman_documentary()
+    build_noir_stickman_video()
